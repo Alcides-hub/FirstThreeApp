@@ -75,37 +75,18 @@ function ImageSphere() {
 
   return (
     <mesh ref={mesh}>
-      <sphereGeometry args={[30, 32, 32]} />
+      <sphereGeometry args={[40, 32, 32]} />
       <meshBasicMaterial map={texture} side={Three.BackSide} />
     </mesh>
   );
 }
 
-function Box(props) {
-  const [active, setActive] = useState(false);
-  const mesh = useRef();
 
-  useFrame((state, delta) => {
-    if (active) {
-      mesh.current.rotation.y += delta;
-      mesh.current.rotation.x += delta;
-    }
-  });
-
-  return (
-    <mesh
-      {...props}
-      ref={mesh}
-      scale={active ? 1.5 : 1}
-      onClick={(event) => setActive(!active)}
-    >
-      <boxGeometry />
-      <meshStandardMaterial color={active ? 'green' : 'gray'} />
-    </mesh>
-  );
-}
 
 function EggBox(Props) {
+  const [active, setActive] = useState(false);
+  
+  
   const [cavity, diffuse, normals, occlusion, rough] = useLoader(TextureLoader, [
     require('./assets/egg-box/textures/BoiteOeufs_cavity.jpg'),
     require('./assets/egg-box/textures/BoiteOeufs_Diffuse.jpg'),
@@ -119,77 +100,84 @@ function EggBox(Props) {
     OBJLoader,
     require('./assets/egg-box/BoiteOeufs_LOW_UV.obj'),
   );
-  const mesh = useRef();
+  const meshMaterial = useRef(new Three.MeshStandardMaterial({
+    map: diffuse,
+    normalMap: normals,
+    aoMap: occlusion,
+    roughnessMap: rough,
+    
+  }));
+
+  const originalColor = useRef();  // New ref to store original color
+
   obj.traverse((child) => {
     if (child instanceof Three.Mesh) {
-      child.material = new Three.MeshStandardMaterial({
-        map: diffuse,
-        normalMap: normals,
-        aoMap: occlusion,
-        roughnessMap: rough,
-      });
+      child.material = meshMaterial.current;
     }
   });
+
+  // Update material color based on 'active' state
+  useEffect(() => {
+    if (active) {
+      // Store the original color when object becomes active
+      originalColor.current = meshMaterial.current.color.clone();
+      meshMaterial.current.color.set('green');
+    } else {
+      // Reset to original color when object becomes inactive
+      if (originalColor.current) {
+        meshMaterial.current.color.copy(originalColor.current);
+      }
+    }
+  }, [active]);
+
+  const mesh = useRef();
+  const rotationY = useRef(0); // This will keep track of the current Y rotation.
+  const targetRotationY = useRef(0);  // New ref to store the target rotation.
   
+
+  useEffect(() => {
+    if (active) {
+        targetRotationY.current = Math.PI;  // 180 degrees in radians.
+    } else {
+        targetRotationY.current = 0;  // Reset rotation.
+    }
+  }, [active]);
+  
+  const rotationSpeed = 0.03; // Adjust this value for desired rotation speed
+  useFrame((state, delta) => {
+    if (active) {
+      rotationY.current += delta;
+      // If rotation surpasses 180 degrees, reset it.
+      // If rotation surpasses 180 degrees, reset it.
+      if (rotationY.current >=2 * Math.PI) {
+        rotationY.current -= 2 * Math.PI; 
+      }
+    } else {
+      // If not active, smoothly reset rotation to original position
+      rotationY.current -= rotationSpeed;
+      if (rotationY.current <= 0) {
+        rotationY.current = 0;
+      }
+    }
+
+    mesh.current.rotation.y = rotationY.current;
+  });
+    
   return (
-    <mesh ref={mesh}>
-      <primitive object={obj} scale={0.1} />
+    <mesh 
+    ref={mesh} 
+    position={[0, -4, -30]} 
+    rotation={active ? [0, Math.PI / 2, 0] : [0, 0, 99]}>
+      <primitive 
+      object={obj} 
+      scale={active ? 0.4 : 0.1} 
+      onClick={(event) => setActive(!active)}
+      />      
     </mesh>
   );
 }  
 
-// function Shoe(props) {
-//   const [base, normal, rough] = useLoader(TextureLoader, [
-//     require('./assets/Airmax/textures/BaseColor.jpg'),
-//     require('./assets/Airmax/textures/Normal.jpg'),
-//     require('./assets/Airmax/textures/Roughness.png'),
-//   ]);
 
-//   const material = useLoader(MTLLoader, require('./assets/Airmax/shoe.mtl'));
-
-//   const obj = useLoader(
-//     OBJLoader,
-//     require('./assets/Airmax/shoe.obj'),
-//     (loader) => {
-//       material.preload();
-//       loader.setMaterials(material);
-//     }
-//   );
-
-//   const mesh = useRef();
-
-//   useLayoutEffect(() => {
-//     obj.traverse((child) => {
-//       if (child instanceof THREE.Mesh) {
-//         child.material.map = base;
-//         child.material.normalMap = normal;
-//         child.material.roughnessMap = rough;
-//       }
-//     });
-//   }, [obj]);
-
-//   useFrame((state, delta) => {
-//     let { x, y, z } = props.animatedSensor.sensor.value;
-//     x = ~~(x * 100) / 5000;
-//     y = ~~(y * 100) / 5000;
-//     mesh.current.rotation.x += x;
-//     mesh.current.rotation.y += y;
-//   });
-
-//   return (
-//     <mesh ref={mesh} rotation={[0.7, 0, 0]}>
-//       <primitive object={obj} scale={10} />
-//     </mesh>
-//   );
-// }
-// function SimpleModel() {
-//   return (
-//     <mesh>
-//       <boxGeometry args={[1, 1, 1]} />
-//       <meshStandardMaterial color="red" />
-//     </mesh>
-//   );
-// }
 
 export default function App() {
   // const animatedSensor = useAnimatedSensor(SensorType.GYROSCOPE, {
@@ -204,8 +192,6 @@ export default function App() {
           <CameraControls />
           <ImageSphere />
           {/* <SimpleModel/> */}
-          <Box position={[-1.2, 0, 0]} />
-          <Box position={[1.2, 0, 0]} />
           <Suspense fallback={null}>
             
             {/* <AmazonBox />
