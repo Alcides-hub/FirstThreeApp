@@ -73,7 +73,7 @@ function CameraControls() {
 
 function ImageSphere() {
   const mesh = useRef();
-  const texture = new Three.TextureLoader().load(require('./assets/art_gall_3.png'));
+  const texture = new Three.TextureLoader().load(require('./assets/art_gallery_1.png'));
 
   return (
     <mesh ref={mesh}>
@@ -229,7 +229,7 @@ export default function App() {
         </Canvas>  
         {isDrawerOpen && (
         <TouchableWithoutFeedback onPress={toggleDrawer}>
-          <View style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.7)', alignItems: 'center', justifyContent: 'center'}}>
+          <View style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, alignItems: 'center', justifyContent: 'center'}}>
             <SideDrawer isOpen={isDrawerOpen} items={interactedItems} />
           </View>
         </TouchableWithoutFeedback>
