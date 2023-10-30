@@ -1,10 +1,12 @@
 import { useState, useRef, Suspense, useEffect } from 'react';
+import { View, TouchableOpacity, Image, Text, TouchableWithoutFeedback } from 'react-native';
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber/native';
 import * as Three from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 // import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader';
 // import { TextureLoader } from 'expo-three';
 import { TextureLoader } from 'three';
+import SideDrawer from './components/side_drawer';
 
 // import { useAnimatedSensor, SensorType } from 'react-native-reanimated';
 import { Gyroscope } from 'expo-sensors';
@@ -83,7 +85,7 @@ function ImageSphere() {
 
 
 
-function EggBox(Props) {
+function EggBox({onInteract}) {
   const [active, setActive] = useState(false);
   
   
@@ -94,6 +96,16 @@ function EggBox(Props) {
     require('./assets/egg-box/textures/BoiteOeufs_occlusion.jpg'),
     require('./assets/egg-box/textures/BoiteOeufs_Rough.jpg')
   ]);
+
+  const handleInteraction = () => {
+    console.log("EggBox clicked"); // Debug log
+    // This function could be passed in via props, or 
+    // you can manage the state within this component itself.
+    if (typeof onInteract === 'function') {
+      onInteract("EggBox");
+    }
+    setActive(!active);
+  };
 
 
     const obj = useLoader(
@@ -164,14 +176,14 @@ function EggBox(Props) {
   });
     
   return (
-    <mesh 
+    <mesh  
+    onClick={handleInteraction}
     ref={mesh} 
     position={[0, -4, -30]} 
     rotation={active ? [0, Math.PI / 2, 0] : [0, 0, 99]}>
       <primitive 
       object={obj} 
       scale={active ? 0.4 : 0.1} 
-      onClick={(event) => setActive(!active)}
       />      
     </mesh>
   );
@@ -183,9 +195,25 @@ export default function App() {
   // const animatedSensor = useAnimatedSensor(SensorType.GYROSCOPE, {
   //   interval: 100,
   // });
+  const [interactedItems, setInteractedItems] = useState([]);
+  const [isDrawerOpen, setDrawerOpen] = useState(false);
 
+  const toggleDrawer = () => {
+    setDrawerOpen(!isDrawerOpen);
+  };
+
+  const handleItemInteraction = (itemName) => {
+    console.log("Item interacted:", itemName);
+
+    // Avoid adding duplicate items
+    if (!interactedItems.includes(itemName)) {
+      setInteractedItems([...interactedItems, itemName]);
+    }
+  };
+  
+  
   return (
-   
+    <View style={{ flex: 1 }}>
       <Canvas camera={{ position: [0, 0, 19] }} >
           <ambientLight />
           <pointLight position={[1, 15, 15]} />
@@ -196,9 +224,19 @@ export default function App() {
             
             {/* <AmazonBox />
             <Shoe animatedSensor={animatedSensor} /> */}
-            <EggBox/>
+            <EggBox onInteract={handleItemInteraction}/>
           </Suspense> 
-          
         </Canvas>  
+        {isDrawerOpen && (
+        <TouchableWithoutFeedback onPress={toggleDrawer}>
+          <View style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.7)', justifyContent: 'center'}}>
+            <SideDrawer isOpen={isDrawerOpen} items={interactedItems} />
+          </View>
+        </TouchableWithoutFeedback>
+      )}
+      <TouchableOpacity style={{ position: 'absolute', top: 30, left: 20 }} onPress={toggleDrawer}>
+        <Image source={require('./assets/push_ui.png')} style={{ width: 40, height: 40 }} />
+      </TouchableOpacity>
+    </View>
   );
 }
