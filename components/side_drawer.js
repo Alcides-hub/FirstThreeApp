@@ -1,5 +1,5 @@
 import React, {useRef} from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, TouchableWithoutFeedback  } from 'react-native';
+import { View, Button, Text, StyleSheet, FlatList, Image, TouchableOpacity, TouchableWithoutFeedback  } from 'react-native';
 import my3Dobjects from '../data/3d_objects_list.json';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
@@ -11,7 +11,7 @@ import clamp from '../image/clamp.jpg';
 
 
 
-const SideDrawer = ({ isOpen, items }) => {
+const SideDrawer = ({ isOpen, items, onLook, onUseItem, selectedItem }) => {
   const [currentIndex, setCurrentIndex] = React.useState(1);
   const flatListRef = useRef(null);
 
@@ -79,6 +79,9 @@ const renderItem = ({ item }) => (
 );
 
 
+const isItemSelected = selectedItem != null;
+
+
     return (
   <TouchableWithoutFeedback onPress={(e) => e.preventDefault()}>
     <View style={[styles.drawer, isOpen ? styles.openDrawer : styles.closedDrawer]}>
@@ -96,12 +99,19 @@ const renderItem = ({ item }) => (
         decelerationRate="fast"
         renderItem={renderItem}
         keyExtractor={(item) => item.name}
-
       />
 
       <TouchableOpacity style={styles.arrow} onPress={scrollToPrevItem}>
         <FontAwesomeIcon icon={faChevronRight} />
       </TouchableOpacity>
+      <View style={styles.buttonContainer}>
+      <TouchableOpacity style={styles.buttonStyle} onPress={() => onLook(selectedItem)} disabled={!isItemSelected} >
+          <Text style={styles.buttonText}>Look</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.buttonStyle} onPress={() => onUseItem(selectedItem)} disabled={!isItemSelected}>
+          <Text style={styles.buttonText}>Use</Text>
+      </TouchableOpacity>
+</View>
     </View>
   </TouchableWithoutFeedback>
 );
@@ -117,16 +127,14 @@ const renderItem = ({ item }) => (
       justifyContent: 'center',
       backgroundColor: 'rgba(255, 255, 255, 0.6)',
       padding: 10,
-      paddingTop: 60,
+      paddingTop: 50,
       borderRadius: 10, 
     },
     openDrawer: {
-      // Style for an open drawer
       width: '85%',
       height: '55%',
     },
     closedDrawer: {
-      
     },
     itemText: {
       color: 'black',
@@ -145,6 +153,25 @@ const renderItem = ({ item }) => (
     flatlist: {
       flex: 1,
     },
+    buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+
+    alignItems: 'center',
+    padding: 7, // Add padding if needed
+    },
+    buttonStyle: {
+    width: 70, // Set the width you want
+    height: 50, // Set the height you want
+    borderRadius: 30, // Half of width/height to make it round
+    justifyContent: 'center', // Center the text inside the button
+    alignItems: 'center', // Center the text inside the button
+    backgroundColor: 'grey', 
+    marginHorizontal: 40,
+    },
+    buttonText: {
+      color: 'white',
+    }
   });
   
   export default SideDrawer;
