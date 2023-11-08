@@ -1,12 +1,16 @@
 import { useState, useRef, Suspense, useEffect } from 'react';
-import { View, TouchableOpacity, Image, Text, TouchableWithoutFeedback } from 'react-native';
+import { View, TouchableOpacity, Image, Text, TouchableWithoutFeedback, StyleSheet } from 'react-native';
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber/native';
 import * as Three from 'three';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faCrosshairs} from '@fortawesome/free-solid-svg-icons';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 // import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader';
 // import { TextureLoader } from 'expo-three';
 import { TextureLoader } from 'three';
 import SideDrawer from './components/side_drawer';
+import Hotspot from './components/hotspot';
+import ImageModal from './modal/imageModal';
 
 // import { useAnimatedSensor, SensorType } from 'react-native-reanimated';
 import { Gyroscope } from 'expo-sensors';
@@ -74,10 +78,11 @@ function CameraControls() {
 function ImageSphere() {
   const mesh = useRef();
   const texture = new Three.TextureLoader().load(require('./assets/art_gallery_1.png'));
+ 
 
   return (
     <mesh ref={mesh}>
-      <sphereGeometry args={[40, 32, 32]} />
+      <sphereGeometry args={[60, 32, 32]} />
       <meshBasicMaterial map={texture} side={Three.BackSide} />
     </mesh>
   );
@@ -87,6 +92,7 @@ function ImageSphere() {
 
 function EggBox({onInteract}) {
   const [active, setActive] = useState(false);
+  const [showEggBox, setShowEggBox] = useState(true);
   
   
   const [cavity, diffuse, normals, occlusion, rough] = useLoader(TextureLoader, [
@@ -104,7 +110,12 @@ function EggBox({onInteract}) {
     if (typeof onInteract === 'function') {
       onInteract("EggBox");
     }
+    // If already active (i.e., has been clicked once and is rotating), hide the EggBox
+    if (active) {
+      setShowEggBox(false);
+  }
     setActive(!active);
+    
   };
 
 
@@ -143,43 +154,43 @@ function EggBox({onInteract}) {
   }, [active]);
 
   const mesh = useRef();
-  const rotationY = useRef(0); // This will keep track of the current Y rotation.
-  const targetRotationY = useRef(0);  // New ref to store the target rotation.
-  
+const rotationY = useRef(0); // This will keep track of the current Y rotation.
+const targetRotationY = useRef(0);  // New ref to store the target rotation.
 
-  useEffect(() => {
-    if (active) {
-        targetRotationY.current = Math.PI;  // 180 degrees in radians.
-    } else {
-        targetRotationY.current = 0;  // Reset rotation.
-    }
-  }, [active]);
-  
-  const rotationSpeed = 0.03; // Adjust this value for desired rotation speed
-  useFrame((state, delta) => {
-    if (active) {
-      rotationY.current += delta;
-      // If rotation surpasses 180 degrees, reset it.
-      // If rotation surpasses 180 degrees, reset it.
-      if (rotationY.current >=2 * Math.PI) {
-        rotationY.current -= 2 * Math.PI; 
-      }
-    } else {
-      // If not active, smoothly reset rotation to original position
-      rotationY.current -= rotationSpeed;
-      if (rotationY.current <= 0) {
-        rotationY.current = 0;
-      }
-    }
+useEffect(() => {
+  if (active) {
+      targetRotationY.current = Math.PI;  // 180 degrees in radians.
+  } else {
+      targetRotationY.current = 0;  // Reset rotation.
+  }
+}, [active]);
 
+const rotationSpeed = 0.03; // Adjust this value for desired rotation speed
+
+useFrame((state, delta) => {
+  if (active) {
+    rotationY.current += delta;
+    if (rotationY.current >= 2 * Math.PI) {
+      rotationY.current -= 2 * Math.PI;
+    }
+  } else {
+    rotationY.current -= rotationSpeed;
+    if (rotationY.current <= 0) {
+      rotationY.current = 0;
+    }
+  }
+
+  if (mesh.current) {
     mesh.current.rotation.y = rotationY.current;
-  });
+  }
+});
     
   return (
+    showEggBox &&
     <mesh  
-    onClick={handleInteraction}
     ref={mesh} 
-    position={[0, -4, -30]} 
+    onClick={handleInteraction}
+    position={[0, -5, -30]} 
     rotation={active ? [0, Math.PI / 2, 0] : [0, 0, 99]}>
       <primitive 
       object={obj} 
@@ -192,45 +203,67 @@ function EggBox({onInteract}) {
 
 
 export default function App() {
-  // const animatedSensor = useAnimatedSensor(SensorType.GYROSCOPE, {
-  //   interval: 100,
-  // });
   const [interactedItems, setInteractedItems] = useState([]);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
+  const [isImageOpen, setIsImageOpen] = useState(false);
+  const [CurrentSelectedItem, setCurrentSelectedItem] = useState(null);
 
   const toggleDrawer = () => {
     setDrawerOpen(!isDrawerOpen);
   };
 
+  const toggleImage = () => {
+    console.log("Current state before toggle:", isImageOpen);
+    setIsImageOpen(!isImageOpen);
+    console.log("State after toggling:", !isImageOpen);
+  };
+
   const handleItemInteraction = (itemName) => {
     console.log("Item interacted:", itemName);
-
+  
     // Avoid adding duplicate items
     if (!interactedItems.includes(itemName)) {
       setInteractedItems([...interactedItems, itemName]);
     }
+    
+    if (itemName === "Hotspot") {
+      setIsImageOpen(!isImageOpen);
+    }
+    setCurrentSelectedItem(itemName);
+  };
+
+  const onLook = (itemName) => {
+    // Implement the "Look" functionality based on itemName
+    console.log(`Looking at ${itemName}`);
+    // Open a modal or show information about itemName
   };
   
+  const onUseItem = (itemName) => {
+    // Implement the "Use" functionality based on itemName
+    console.log(`Using ${itemName}`);
+    // Perform an action with itemName
+  };
   
+
   return (
     <View style={{ flex: 1 }}>
-      <Canvas camera={{ position: [0, 0, 19] }} >
-          <ambientLight />
-          <pointLight position={[1, 15, 15]} />
-          <CameraControls />
-          <ImageSphere />
-          {/* <SimpleModel/> */}
-          <Suspense fallback={null}>
-            
-            {/* <AmazonBox />
-            <Shoe animatedSensor={animatedSensor} /> */}
-            <EggBox onInteract={handleItemInteraction}/>
-          </Suspense> 
-        </Canvas>  
-        {isDrawerOpen && (
+      <Canvas camera={{ position: [0, 0, 19] }}>
+        <ambientLight />
+        <pointLight position={[1, 15, 15]} />
+        <CameraControls />
+        <ImageSphere />
+        <Suspense fallback={null}>
+          <EggBox onInteract={handleItemInteraction} />
+          <Hotspot onClick={handleItemInteraction} /> 
+        </Suspense>
+      </Canvas>
+
+      <ImageModal isVisible={isImageOpen} onClose={toggleImage} />
+
+      {isDrawerOpen && (
         <TouchableWithoutFeedback onPress={toggleDrawer}>
-          <View style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.7)', justifyContent: 'center'}}>
-            <SideDrawer isOpen={isDrawerOpen} items={interactedItems} />
+          <View style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.7)', justifyContent: 'center' }}>
+            <SideDrawer isOpen={isDrawerOpen} items={interactedItems} selectedItem={CurrentSelectedItem} onLook={onLook} onUseItem={onUseItem} />
           </View>
         </TouchableWithoutFeedback>
       )}
