@@ -1,8 +1,13 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { useFrame, useLoader } from '@react-three/fiber/native';
+import { useFrame, useLoader, useThree } from '@react-three/fiber/native';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
+import * as Three from 'three';
+import { Dimensions } from 'react-native';
 
-function Hotspot({isImageOpen, onClick}) {
+function Hotspot({isImageOpen, onClick, onTouchEnd, saveCameraState}) {
+
+  const { camera} = useThree();
+  const windowDimensions = Dimensions.get('window');
     
   const obj = useLoader(
     OBJLoader,
@@ -23,6 +28,32 @@ function Hotspot({isImageOpen, onClick}) {
       console.log("clicked!", isImageOpen)
     }
   };
+
+  const handleTouch = (event) => {
+    // Calculate touch position in normalized device coordinates (-1 to +1)
+    // Assuming the hotspot is the same size as the window/screen:
+    const touchX = (event.nativeEvent.locationX / windowDimensions.width) * 2 - 1;
+  const touchY = -(event.nativeEvent.locationY / windowDimensions.height) * 2 + 1;
+
+  saveCameraState();
+  
+    // Create a vector for the raycaster
+    const pointerVector = new Three.Vector2(touchX, touchY);
+    
+    // Use Raycaster to find intersections
+    const raycaster = new Three.Raycaster();
+    raycaster.setFromCamera(pointerVector, camera);
+    const intersects = raycaster.intersectObject(mesh.current);
+  
+    if (intersects.length > 0) {
+      // If the ray intersects with the mesh, call the onTouchEnd prop
+      if (typeof onTouchEnd === 'function') {
+        onTouchEnd(intersects[0].point);
+      }
+    }
+  };
+  
+  
   
 //   useEffect(() => {
 //     if (isImageOpen) {
@@ -34,6 +65,7 @@ function Hotspot({isImageOpen, onClick}) {
   return (
     <mesh
       ref={mesh}
+      onPointerDown={handleTouch}
       position={[22, 5, -47]}
       rotation={[0, Math.PI / 2, 0]} // Adjust the rotation as needed
       scale={[0.5, 0.5, 0.5]} // Adjust the scale as needed
