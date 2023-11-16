@@ -97,7 +97,7 @@ function ImageSphere() {
 
 
 
-function EggBox({onInteract, showObject, setShowObject}) {
+function EggBox({onInteract, showObject, setShowObject, onPress}) {
   const [active, setActive] = useState(false);
   
   
@@ -110,7 +110,7 @@ function EggBox({onInteract, showObject, setShowObject}) {
     require('./assets/egg-box/textures/BoiteOeufs_Rough.jpg')
   ]);
 
-  const handleInteraction = () => {
+  const handleInteraction = (event) => {
     console.log("EggBox clicked"); // Debug log
     // This function could be passed in via props, or 
     // you can manage the state within this component itself.
@@ -121,8 +121,11 @@ function EggBox({onInteract, showObject, setShowObject}) {
     if (active) {
       setShowObject(true);
   }
+    if (onPress) {
+      onPress();
+    }
     setActive(!active);
-    
+    event.stopPropagation();
   };
 
   
@@ -362,7 +365,7 @@ const cameraRef = useRef(null);
         <ImageSphere />
         </Suspense>
         <Suspense fallback={null}>
-          <EggBox onInteract={handleItemInteraction} showObject={showObject} setShowObject={setShowObject} usedItems={usedItems} />
+          <EggBox onInteract={handleItemInteraction} onPress={toggleDrawer}  showObject={showObject} setShowObject={setShowObject} usedItems={usedItems} />
           <Hotspot saveCameraState={saveCameraState} onClick={handleItemInteraction} onTouchEnd={handleTouchEnd} /> 
         </Suspense>
         {sphericalCoords && <ZoomControls targetSphericalCoords={sphericalCoords} zoomLevel={zoomLevel} zoomActive={zoomActive} />}
