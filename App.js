@@ -13,6 +13,8 @@ import Hotspot from './components/hotspot';
 import ImageModal from './modal/imageModal';
 import Dialoguebox1 from './components/dialogue_box1';
 import ZoomControls from './components/zoomControls';
+import * as ScreenOrientation from 'expo-screen-orientation';
+
 
 // import { useAnimatedSensor, SensorType } from 'react-native-reanimated';
 import { Gyroscope } from 'expo-sensors';
@@ -48,40 +50,61 @@ const lowPassFilter = (newValue, oldValue, alpha) => {
 function CameraControls() {
   const { camera } = useThree();
   const gyroscopeData = useRef({ x: 0, y: 0, z: 0 });
-  const previousRotation = useRef(new Three.Quaternion());
+  const initialOrientationSet = useRef(false);
+  const initialOrientation = useRef(new Three.Quaternion());
+
+  
+  // Set the initial orientation once
+  useEffect(() => {
+    // Adjust the second parameter (Y axis rotation) to fine-tune the initial direction the camera faces
+    // The value is in radians, and 2 * Math.PI radians equals 360 degrees.
+    // Since you mentioned it's a little to the right, try subtracting a small value from Math.PI and adjust as needed.
+    const yRotation = Math.PI ; // start with directly behind the initial position
+    const fineTuning = -0.4; // adjust this value to fine-tune the direction
+  
+    initialOrientation.current.setFromEuler(new Three.Euler(0, yRotation - fineTuning, 0, 'XYZ'));
+    camera.quaternion.copy(initialOrientation.current);
+    initialOrientationSet.current = true;
+  }, [camera]);
 
   // Initialize the gyroscope sensor
   useGyroscope((data) => {
-    gyroscopeData.current = {
-      x: lowPassFilter(data.x, gyroscopeData.current.x, 0.1), // Adjust the alpha value for smoothing
-      y: lowPassFilter(data.y, gyroscopeData.current.y, 0.1),
-      z: lowPassFilter(data.z, gyroscopeData.current.z, 0.1),
-    };
+    if (initialOrientationSet.current) {
+      gyroscopeData.current = {
+        x: lowPassFilter(data.x, gyroscopeData.current.x, 0.05),
+        y: lowPassFilter(data.y, gyroscopeData.current.y, 0.05),
+        z: lowPassFilter(data.z, gyroscopeData.current.z, 0.05),
+      };
+    }
   });
 
-  
+  // The lowPassFilter function itself
+const lowPassFilter = (newValue, oldValue, alpha) => {
+  return oldValue + alpha * (newValue - oldValue);
+};
 
-  useFrame(() => {
-    const { x, y, z } = gyroscopeData.current;
-    
-    // Update camera rotation here using x, y, z values
-    // For example, you can use Quaternion rotations to rotate the camera
-    const rotationQuaternion = new Three.Quaternion().setFromEuler(
-      new Three.Euler(x, y, 0, 'XYZ')
+useFrame(() => {
+  if (initialOrientationSet.current) {
+    // Update the camera rotation based on the gyroscope data
+    const gyroQuaternion = new Three.Quaternion().setFromEuler(
+      new Three.Euler(gyroscopeData.current.x, gyroscopeData.current.y, gyroscopeData.current.z, 'XYZ')
     );
 
-    // Use a lower slerp factor for smoother camera movement
-    camera.quaternion.slerp(rotationQuaternion, 0.05); // Adjust the factor as needed
-  });
+    // Apply the gyroscope data as a delta from the initial orientation
+    const targetQuaternion = initialOrientation.current.clone().multiply(gyroQuaternion);
+
+    // Slerp for smoother camera movement
+    camera.quaternion.slerp(targetQuaternion, 0.1); // Adjust this factor to control sensitivity
+  }
+});
 
   return null;
 }
 
-
 function ImageSphere() {
   const mesh = useRef();
   // useLoader will load the texture and cache it for later use
-  const texture = useLoader(Three.TextureLoader, require('./assets/art_gall_2.png'));
+  const texture = useLoader(Three.TextureLoader, require('./assets/UmbrellaTestRoom.jpg'));
 
   // If texture is not loaded, don't render the sphere yet
   if (!texture) return null;
@@ -89,7 +112,7 @@ function ImageSphere() {
 
   return (
     <mesh ref={mesh}>
-      <sphereGeometry args={[60, 32, 32]} />
+      <sphereGeometry args={[180, 129, 52]} />
       <meshBasicMaterial map={texture} side={Three.BackSide} />
     </mesh>
   );
@@ -205,11 +228,11 @@ function EggBox({onInteract, showObject, setShowObject, onPress}) {
     <mesh  
     ref={mesh} 
     onClick={handleInteraction}
-    position={[0, -5, -30]} 
+    position={[39, -6, 112]} 
     rotation={[0, 0, 99]}>
       <primitive 
       object={obj} 
-      scale={0.1} 
+      scale={0.5} 
       />      
     </mesh>
   );
@@ -317,6 +340,15 @@ const cameraRef = useRef(null);
       [itemName]: true
     }));
   };
+
+  useEffect(() => {
+    async function lockOrientation() {
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+    }
+    
+    lockOrientation();
+  }, []);
+  
 
   const handleTouchEnd = (point) => {
     const spherical = new Three.Spherical().setFromVector3(point);
