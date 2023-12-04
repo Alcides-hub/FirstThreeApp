@@ -59,8 +59,8 @@ function CameraControls() {
     // Adjust the second parameter (Y axis rotation) to fine-tune the initial direction the camera faces
     // The value is in radians, and 2 * Math.PI radians equals 360 degrees.
     // Since you mentioned it's a little to the right, try subtracting a small value from Math.PI and adjust as needed.
-    const yRotation = Math.PI ; // start with directly behind the initial position
-    const fineTuning = -0.4; // adjust this value to fine-tune the direction
+    const yRotation = Math.PI * 2 ; // start with directly behind the initial position
+    const fineTuning = 0.37; // adjust this value to fine-tune the direction
   
     initialOrientation.current.setFromEuler(new Three.Euler(0, yRotation - fineTuning, 0, 'XYZ'));
     camera.quaternion.copy(initialOrientation.current);
@@ -82,37 +82,57 @@ function CameraControls() {
 const lowPassFilter = (newValue, oldValue, alpha) => {
   return oldValue + alpha * (newValue - oldValue);
 };
+// useEffect(() => {
+//   // Set the camera to an initial upright orientation
+//   // Adjust these values as needed to ensure the camera starts upright
+//   camera.rotation.set(0, 0, 0); // This sets the camera to a default upright position
+//   initialOrientation.current.copy(camera.quaternion); // Store this as the initial orientation
+//   initialOrientationSet.current = true;
+// }, [camera]);
 
 useFrame(() => {
-  if (initialOrientationSet.current) {
-    // Update the camera rotation based on the gyroscope data
-    const gyroQuaternion = new Three.Quaternion().setFromEuler(
-      new Three.Euler(gyroscopeData.current.x, gyroscopeData.current.y, gyroscopeData.current.z, 'XYZ')
-    );
+  // Adjusting the scale factors for sensitivity
+  const pitchScale = 0.03; // Control sensitivity of up and down movement
+  const yawScale = 0.03; // Control sensitivity of left and right movement
 
-    // Apply the gyroscope data as a delta from the initial orientation
-    const targetQuaternion = initialOrientation.current.clone().multiply(gyroQuaternion);
+  // Map gyroscope pitch (y-axis) to camera's X-axis (up and down)
+  // Map gyroscope yaw (x-axis) to camera's Y-axis (left and right)
+  const pitch = gyroscopeData.current.y * - pitchScale;
+  const yaw = gyroscopeData.current.x * yawScale;
 
-    // Slerp for smoother camera movement
-    camera.quaternion.slerp(targetQuaternion, 0.1); // Adjust this factor to control sensitivity
-  }
+  // Apply the gyroscope data directly to the camera rotation
+  // This will continuously update the camera's orientation based on the gyroscope
+  camera.rotation.x += pitch;
+  camera.rotation.y += yaw;
+
+  // Optional: Clamp the rotation to prevent extreme tilting or turning
+  const maxPitch = Math.PI / 20; // Limit up/down movement
+  camera.rotation.x = Math.max(-maxPitch, Math.min(maxPitch, camera.rotation.x));
+
+  // Ensure the rotation values stay within a valid range
+  camera.rotation.x %= 2 * Math.PI;
+  camera.rotation.y %= 2 * Math.PI;
 });
+
+
 
   return null;
 }
 
 function ImageSphere() {
   const mesh = useRef();
-  // useLoader will load the texture and cache it for later use
-  const texture = useLoader(Three.TextureLoader, require('./assets/UmbrellaTestRoom.jpg'));
+  const texture = useLoader(Three.TextureLoader, require('./assets/TokkaidoRoom1.jpg'));
+
+  // Flip texture horizontally
+  texture.wrapS = Three.RepeatWrapping;
+  texture.repeat.x = -1;
 
   // If texture is not loaded, don't render the sphere yet
   if (!texture) return null;
 
-
   return (
     <mesh ref={mesh}>
-      <sphereGeometry args={[180, 129, 52]} />
+      <sphereGeometry args={[600, 123, 32]} />
       <meshBasicMaterial map={texture} side={Three.BackSide} />
     </mesh>
   );
@@ -242,12 +262,12 @@ const SetupCamera = ({ setCameraRef }) => {
   const { camera } = useThree();
   
   useEffect(() => {
+    camera.rotation.set(Math.PI, 0, 0); // Set the initial position
     setCameraRef(camera);
   }, [camera, setCameraRef]);
 
   return null; // This component does not render anything
 };
-
 
 export default function App() {
   const [interactedItems, setInteractedItems] = useState([]);
