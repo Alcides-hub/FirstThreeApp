@@ -66,7 +66,7 @@ function Hotspot({isImageOpen, onClick, onTouchEnd, saveCameraState}) {
     <mesh
       ref={mesh}
       onPointerDown={handleTouch}
-      position={[36, 3, 56]}
+      position={[28, 3, -20]}
       rotation={[0, Math.PI / 2, 0]} // Adjust the rotation as needed
       scale={[0.5, 0.5, 0.5]} // Adjust the scale as needed
       onClick={handleClick} // Handle the click event
