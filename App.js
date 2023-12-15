@@ -1,4 +1,4 @@
-import { useState, useRef, Suspense, useEffect } from 'react';
+import { useState, useRef, Suspense, useEffect} from 'react';
 import { View, TouchableOpacity, Image, Text, TouchableWithoutFeedback, StyleSheet } from 'react-native';
 import { Canvas, useLoader, useThree} from '@react-three/fiber/native';
 import * as Three from 'three';
@@ -17,6 +17,14 @@ import EggBox from './components/eggBox';
 import ImageSphere from './components/imageSphere';
 import SetupCamera from './components/setUpCamera';
 import CharacterImage from './components/character';
+import { initializeApp } from "firebase/app";
+import firestore from './firebaseConfig';
+import AppLoading from 'expo-app-loading';
+import { useFonts, PatuaOne_400Regular } from '@expo-google-fonts/patua-one';
+
+
+
+
 
 
 
@@ -42,6 +50,15 @@ const [controlMode, setControlMode] = useState('gyroscope'); // 'gyroscope' or '
 const [zoomActive, setZoomActive] = useState(false);
 const cameraRef = useRef(null);
 const [rotationAngle, setRotationAngle] = useState(0);
+const [fontsLoaded] = useFonts({
+  PatuaOne_400Regular,
+});
+
+
+
+
+
+
 
 // Toggle control mode
 const toggleControlMode = () => {
@@ -163,10 +180,13 @@ const handleRotate = (angle) => {
 // <Your3DModelComponent rotation={rotationAngle} ... />
 
 
-
+if (!fontsLoaded) {
+  return <AppLoading />;
+} else {
   return (
+    
     <View style={{ flex: 1, position: 'relative' }}>
-      
+     
       <Canvas camera={{ position: [0, 0, 19] }}>
         <SetupCamera setCameraRef={setCameraRef} />
         <ambientLight />
@@ -199,8 +219,8 @@ const handleRotate = (angle) => {
       <TouchableOpacity style={{ position: 'absolute', top: 30, right: 20 }} onPress={toggleControlMode}>
         <Image source={require('./assets/push_ui.png')} style={{ width: 40, height: 40 }} />
       </TouchableOpacity>
-    
-        
+     
+     
    
 
       {isDialogueVisible && (
@@ -216,4 +236,11 @@ const handleRotate = (angle) => {
     </View>
   );
 }
+}
 
+const styles = StyleSheet.create({
+  title: {
+    fontFamily: 'PatuaOne_400Regular',
+    fontSize: 24,
+  },
+});
