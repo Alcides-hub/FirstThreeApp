@@ -7,7 +7,7 @@ import useGyroscope from './useGyroscope';
 
 
 
-function CameraControls({rotation, controlMode}) {
+function CameraControls({rotation, controlMode, isDialogueActive, showModalNote}) {
     const { camera } = useThree();
     const gyroscopeData = useRef({ x: 0, y: 0, z: 0 });
     const manualRotation = useRef({ x: 0, y: 0 });
@@ -53,7 +53,12 @@ function CameraControls({rotation, controlMode}) {
   // }, [camera]);
   
   useFrame(() => {
-    
+    // if (isDialogueActive) {
+    //   return;
+    // }
+    // if (showModalNote) {
+    //   return;
+    // }
     if (controlMode === 'gyroscope') {
     // Adjusting the scale factors for sensitivity
     const pitchScale = 0.03; // Control sensitivity of up and down movement

@@ -3,7 +3,7 @@ import { View, Button, StyleSheet, Dimensions, TouchableOpacity, TouchableWithou
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
-const TouchControls = ({ onRotate }) => {
+const TouchControls = ({ onRotate, isDialogueActive }) => {
   const handleLeftPress = () => {
     if (onRotate) onRotate(35);
   };
@@ -16,16 +16,19 @@ const TouchControls = ({ onRotate }) => {
 
   return (
     <>
+    {!isDialogueActive && (
       <View style={[styles.buttonContainer, { top: verticalCenter, left: 20 }]}>
         <TouchableOpacity title="Left" onPress={handleLeftPress}>
         <FontAwesomeIcon icon={faChevronLeft} size={22}/>
         </TouchableOpacity>
-      </View>
-      <View style={[styles.buttonContainer, { top: verticalCenter, right: 20 }]}>
+      </View>)}
+
+      {!isDialogueActive && (<View style={[styles.buttonContainer, { top: verticalCenter, right: 20 }]}>
         <TouchableOpacity title="Right" onPress={handleRightPress}>
         <FontAwesomeIcon icon={faChevronRight} size={22}/>
         </TouchableOpacity>
       </View>
+    )}
     </>
   );
 };

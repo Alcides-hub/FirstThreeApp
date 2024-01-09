@@ -6,19 +6,8 @@
     },
     {
       "id": 2,
-      "name": "Red Box",
-      "image": "../image/box_red.jpg"
-    },
-    {
-      "id": 3,
-      "name": "Old Book",
-      "image": "../image/old_book.jpg"
-    },
-    {
-        "id": 4,
-        "name": "Clamp",
-        "image": "../image/clamp.jpg"
+      "name": "note1",
+      "image": "../image/paper_chaper_1.png"
     }
-    
   ]
   

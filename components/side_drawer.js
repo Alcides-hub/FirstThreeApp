@@ -1,26 +1,22 @@
-import React, {useRef} from 'react';
+import React, {useRef, useState, useEffect} from 'react';
 import { View, Button, Text, StyleSheet, FlatList, Image, TouchableOpacity, TouchableWithoutFeedback  } from 'react-native';
 import my3Dobjects from '../data/3d_objects_list.json';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import eggBox from '../image/eggBox.jpg';
-import redBox from '../image/box_red.jpg';
-import oldBook from '../image/old_book.jpg';
-import clamp from '../image/clamp.jpg';
-
-
+import Note1 from '../assets/paper_chaper_1.png'
 
 
 const SideDrawer = ({ isOpen, items, onLook, onUseItem, selectedItem }) => {
   const [currentIndex, setCurrentIndex] = React.useState(1);
+  const [currentViewItem, setCurrentViewItem] = useState(null);
   const flatListRef = useRef(null);
+ 
 
 
   const imageMapper = {
     'EggBox': eggBox,
-    'Red Box': redBox,
-    'Old Book': oldBook,
-    'Clamp': clamp,
+    'note1': Note1,
   };
 
   const mappedItems = items.map(itemName => {
@@ -32,6 +28,7 @@ const SideDrawer = ({ isOpen, items, onLook, onUseItem, selectedItem }) => {
 });
 
 console.log('my3Dobjects data:', my3Dobjects);
+console.log('mappedItems:', mappedItems);
 
 
 const dataToRender = mappedItems.filter(Boolean);
@@ -72,9 +69,20 @@ const scrollToPrevItem = () => {
 
 
 const renderItem = ({ item }) => (
-  <View style={styles.itemContainer}>
+  <View style={styles.flatListItem}>
     <Text style={styles.itemText}>{item.name}</Text>
     <Image source={item.image} style={styles.itemImage} />
+    <View style={styles.buttonContainer}>
+    <TouchableOpacity 
+      style={styles.buttonStyle} 
+      onPress={() => onLook(item.name)}
+    >
+      <Text style={styles.buttonText}>Look</Text>
+    </TouchableOpacity>
+    <TouchableOpacity style={styles.buttonStyle} onPress={() => onUseItem(selectedItem)} disabled={!isItemSelected}>
+          <Text style={styles.buttonText}>Use</Text>
+      </TouchableOpacity>
+      </View>
   </View>
 );
 
@@ -85,7 +93,7 @@ const isItemSelected = selectedItem != null;
     return (
   <TouchableWithoutFeedback onPress={(e) => e.preventDefault()}>
     <View style={[styles.drawer, isOpen ? styles.openDrawer : styles.closedDrawer]}>
-      <TouchableOpacity style={styles.arrow} onPress={scrollToNextItem}>
+      <TouchableOpacity style={styles.arrowLeft} onPress={scrollToNextItem}>
         <FontAwesomeIcon icon={faChevronLeft} />
       </TouchableOpacity>
 
@@ -99,19 +107,12 @@ const isItemSelected = selectedItem != null;
         decelerationRate="fast"
         renderItem={renderItem}
         keyExtractor={(item) => item.name}
+        pagingEnabled={true}
       />
 
-      <TouchableOpacity style={styles.arrow} onPress={scrollToPrevItem}>
+      <TouchableOpacity style={styles.arrowRight} onPress={scrollToPrevItem}>
         <FontAwesomeIcon icon={faChevronRight} />
       </TouchableOpacity>
-      <View style={styles.buttonContainer}>
-      <TouchableOpacity style={styles.buttonStyle} onPress={() => onLook(selectedItem)} disabled={!isItemSelected} >
-          <Text style={styles.buttonText}>Look</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.buttonStyle} onPress={() => onUseItem(selectedItem)} disabled={!isItemSelected}>
-          <Text style={styles.buttonText}>Use</Text>
-      </TouchableOpacity>
-</View>
     </View>
   </TouchableWithoutFeedback>
 );
@@ -119,22 +120,29 @@ const isItemSelected = selectedItem != null;
 
   const styles = StyleSheet.create({
     drawer: {
-      width: '100%', // Just a value, adjust as needed
-      height: '60%',
+      width: 300, // Just a value, adjust as needed
+      height: 100,
       position: 'absolute',
       zIndex: 1000,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: 'rgba(255, 255, 255, 0.6)',
-      padding: 10,
-      paddingTop: 50,
+      padding: 3,
+      paddingTop: 20,
       borderRadius: 10, 
     },
-    openDrawer: {
-      width: '85%',
-      height: '55%',
+    flatListItem: {
+      width: 200,
+      height: 200,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
-    closedDrawer: {
+    openDrawer: {
+      width: '55%',
+      height: '65%',
+    },
+    flatlist: {
+      width: 200,
     },
     itemText: {
       color: 'black',
@@ -143,22 +151,30 @@ const isItemSelected = selectedItem != null;
       marginVertical: 14,
     },
     itemImage: {
-      width: 300, //adjust accordingly
-      height: 200, //adjust accordingly
+      width: 100, //adjust accordingly
+      height: 100, //adjust accordingly
       resizeMode: 'contain'
     },
-    arrow: {
-      padding: 10
+    arrowLeft: {
+      position: 'absolute',
+      left: 100, // Adjust as needed for left alignment
+      top: '50%', // Center vertically
+      zIndex: 1, // Make sure it's above the FlatList
+      transform: [{ translateY: 20 }], // Adjust based on the size of the icon for vertical centering
     },
-    flatlist: {
-      flex: 1,
+    arrowRight: {
+      position: 'absolute',
+      right: 100, // Adjust as needed for right alignment
+      top: '50%', // Center vertically
+      zIndex: 1, // Make sure it's above the FlatList
+      transform: [{ translateY: 20 }], // Adjust based on the size of the icon for vertical centering
     },
     buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
 
     alignItems: 'center',
-    padding: 7, // Add padding if needed
+    padding: 14, // Add padding if needed
     },
     buttonStyle: {
     width: 70, // Set the width you want
@@ -167,7 +183,7 @@ const isItemSelected = selectedItem != null;
     justifyContent: 'center', // Center the text inside the button
     alignItems: 'center', // Center the text inside the button
     backgroundColor: 'grey', 
-    marginHorizontal: 40,
+    marginHorizontal: 20,
     },
     buttonText: {
       color: 'white',

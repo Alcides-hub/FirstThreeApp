@@ -1,25 +1,36 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
+import TypeWriter from 'react-native-typewriter';
+import { useFonts, PatuaOne_400Regular } from "@expo-google-fonts/patua-one";
+
 
 const DialogueBox1 = ({ isVisible, content, onClose }) => {
+  const [patuaLoaded] = useFonts({
+    PatuaOne_400Regular,
+  });
+  if (!patuaLoaded) {
+    return null; // Return a loading state or fallback component here
+  }
     if (!isVisible) return null;
   
     return (
       <View style={styles.dialogueBox}>
+        <TypeWriter typing={1} minDelay={-100}>
         <Text style={styles.dialogueText}>{content}</Text>
-        <TouchableOpacity onPress={onClose}>
+        </TypeWriter>
+        <TouchableWithoutFeedback onPress={onClose}>
           <Text>Close</Text>
-        </TouchableOpacity>
+        </TouchableWithoutFeedback>
       </View>
     );
   };
     
       const styles = StyleSheet.create({
         dialogueBox: {
-          width: 300,
+          width: 200,
           minHeight: 100,
-          padding: 20,
-          backgroundColor: 'white',
+          padding: 10,
+          backgroundColor: 'beige',
           borderRadius: 5,
           alignItems: 'center',
           justifyContent: 'center',
@@ -29,12 +40,14 @@ const DialogueBox1 = ({ isVisible, content, onClose }) => {
           shadowOpacity: 0.25, // for ios shadow
           shadowRadius: 3.84, // for ios shadow
           position: 'absolute',
-          left: '50%',
-          top: '88%',
+          left: '80%',
+          top: '50%',
           transform: [{ translateX: -150 }, { translateY: -50 }] // Centers the dialogue box
         },
         dialogueText: {
-          fontStyle: 'normal',
+          fontFamily: 'PatuaOne_400Regular',
+          lineHeight: 25,
+          color: 'black',
         }
       });
       

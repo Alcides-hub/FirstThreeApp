@@ -5,7 +5,7 @@ const SetupCamera = ({ setCameraRef }) => {
   const { camera } = useThree();
   
   useEffect(() => {
-    camera.rotation.set(0, -0.4, 0); // Set the initial position
+    camera.rotation.set(0, 0, -0.02); // Set the initial position
     setCameraRef(camera);
   }, [camera, setCameraRef]);
 

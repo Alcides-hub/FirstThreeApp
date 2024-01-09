@@ -34,10 +34,10 @@ const styles = StyleSheet.create({
     
     image: {
       position: 'absolute',
-      right: 10, // Adjust as needed for positioning
-      bottom: 10, // Adj
-      height: 300,
-      width: 230,
+      right: 50, // Adjust as needed for positioning
+      bottom: 85, // Adj
+      height: 240,
+      width: 160,
     },
   });
 

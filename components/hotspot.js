@@ -21,13 +21,13 @@ function Hotspot({isImageOpen, onClick, onTouchEnd, saveCameraState}) {
     mesh.current.rotation.y += 0.02;
   });
 
-  const handleClick = () => {
-    console.log("Hotspot clicked!");
-    if (typeof onClick === 'function') {
-        onClick("Hotspot"); // Pass "Hotspot" as the identifier
-      console.log("clicked!", isImageOpen)
-    }
-  };
+  // const handleClick = () => {
+  //   console.log("Hotspot clicked!");
+  //   if (typeof onClick === 'function') {
+  //       onClick("Hotspot"); // Pass "Hotspot" as the identifier
+  //     console.log("clicked!", isImageOpen)
+  //   }
+  // };
 
   const handleTouch = (event) => {
     // Calculate touch position in normalized device coordinates (-1 to +1)
@@ -55,11 +55,11 @@ function Hotspot({isImageOpen, onClick, onTouchEnd, saveCameraState}) {
   
   
   
-//   useEffect(() => {
-//     if (isImageOpen) {
-//       handleClick();
-//     }
-//   }, [isImageOpen]);
+  // useEffect(() => {
+  //   if (isImageOpen) {
+  //     handleClick();
+  //   }
+  // }, [isImageOpen]);
 
 
   return (
@@ -69,7 +69,7 @@ function Hotspot({isImageOpen, onClick, onTouchEnd, saveCameraState}) {
       position={[28, 3, -20]}
       rotation={[0, Math.PI / 2, 0]} // Adjust the rotation as needed
       scale={[0.5, 0.5, 0.5]} // Adjust the scale as needed
-      onClick={handleClick} // Handle the click event
+      // onClick={handleClick} // Handle the click event
     >
       <primitive object={obj} />
     </mesh>
