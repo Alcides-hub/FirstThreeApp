@@ -1,4 +1,4 @@
-import { useState, useRef, Suspense, useEffect } from 'react';
+import { useState, useRef, Suspense, useEffect} from 'react';
 import { View, TouchableOpacity, Image, Text, TouchableWithoutFeedback, StyleSheet } from 'react-native';
 import { Canvas, useLoader, useThree} from '@react-three/fiber/native';
 import * as Three from 'three';
@@ -17,6 +17,39 @@ import EggBox from './components/eggBox';
 import ImageSphere from './components/imageSphere';
 import SetupCamera from './components/setUpCamera';
 import CharacterImage from './components/character';
+import { db } from './firebaseConfig'; 
+import { initializeApp } from "firebase/app";
+import * as Font from 'expo-font';
+import DialogueBox from './components/dialogueBox';
+import ResponseBox from './components/ResponseBox';
+import { getFirestore, doc, getDoc } from "firebase/firestore/lite";
+import Note from './components/Note';
+import ImageModal2 from './modal/imageModal2';
+
+
+
+async function loadFonts() {
+  await Font.loadAsync({
+    'PatuaOne-Regular': require('./assets/fonts/PatuaOne-Regular.ttf'),
+  });
+}
+
+loadFonts();
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD_pXgo9SF67fDf4r_ibq-lV3ctbLdar9k",
+  authDomain: "tokkaidoapp.firebaseapp.com",
+  databaseURL:
+    "https://tokkaidoapp-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "tokkaidoapp",
+  storageBucket: "tokkaidoapp.appspot.com",
+  messagingSenderId: "756050415760",
+  appId: "1:756050415760:web:9b0385bbf413d444964815",
+  measurementId: "G-Z12YHWVYDT",
+};
+const app = initializeApp(firebaseConfig);
+
+
 
 
 
@@ -42,6 +75,110 @@ const [controlMode, setControlMode] = useState('gyroscope'); // 'gyroscope' or '
 const [zoomActive, setZoomActive] = useState(false);
 const cameraRef = useRef(null);
 const [rotationAngle, setRotationAngle] = useState(0);
+// State to hold all dialogue data from Firestore
+const [dialogueData, setDialogueData] = useState(null);
+// State to hold the current dialogue item
+const [currentDialogue, setCurrentDialogue] = useState(null);
+const [currentDialogueIndex, setCurrentDialogueIndex] = useState(0);
+const [characterEmotion, setCharacterEmotion] = useState(null);
+const [isDialogueActive, setIsDialogueActive] = useState(false);
+const [showModalNote, setShowModalNote] = useState(false);
+const [showModalImage, setShowModalImage] = useState(false);
+
+
+// Fetch the dialogue data from Firestore once
+useEffect(() => {
+  const fetchDialogue = async () => {
+    try {
+      const documentSnapshot = await getDoc(doc(db, "kasa_dialogue", "kasa_start"));
+      if (documentSnapshot.exists()) {
+        // Store the entire dialogue data in state
+        setDialogueData(documentSnapshot.data());
+        setCurrentDialogueIndex(0); 
+        setIsDialogueActive(true); // Dialogue starts
+      } else {
+        console.log("Document not found");
+      }
+    } catch (error) {
+      console.error("Error fetching dialogue:", error);
+    }
+  };
+  fetchDialogue();
+}, []);
+
+// Update the currentDialogue whenever currentDialogueIndex changes
+useEffect(() => {
+  if (dialogueData && dialogueData.dialogueList) {
+    setCurrentDialogue(dialogueData.dialogueList[currentDialogueIndex]);
+  }
+}, [currentDialogueIndex, dialogueData]);
+
+const handleNextDialogue = () => {
+  setCurrentDialogueIndex(prevIndex => {
+    const nextIndex = prevIndex + 1;
+    // Check if we have reached the end of the dialogue list or the specific order
+    if (dialogueData && nextIndex < dialogueData.dialogueList.length) {
+      if (dialogueData.dialogueList[nextIndex].order === 4) {
+        // Specific dialogue order reached, handle the end of the dialogue
+        handleEndDialogue();
+      }
+      return nextIndex;
+    } else {
+      // Handle the end of the dialogue, such as resetting or performing some action
+      console.log("End of dialogue reached");
+      handleEndDialogue(); // Call this function when the end of the dialogue list is reached
+      return prevIndex;  // Keep the index the same if there is no next dialogue
+    }
+  });
+};
+
+const handleEndDialogue = () => {
+  setIsDialogueActive(false);
+  setShowModalNote(true);
+  console.log("handleEndDialogue executed");
+  
+  // Additional actions, like navigating to another screen or resetting states
+};
+
+
+const handleOptionPress = async (optionIndex) => {
+  if (!isDialogueActive) return;
+
+  if (dialogueData && dialogueData.dialogueList && optionIndex !== null) {
+    const currentDialogueOrder = dialogueData.dialogueList[currentDialogueIndex].order;
+    
+    // Check if the current dialogue is order 3 and it's the last in the sequence
+    if (currentDialogueOrder === 3 && currentDialogueIndex === dialogueData.dialogueList.length - 1) {
+      handleEndDialogue();
+      return;
+    }
+
+    // Move to the next dialogue
+    const nextDialogueIndex = currentDialogueIndex + 1;
+    if (nextDialogueIndex < dialogueData.dialogueList.length) {
+      setCurrentDialogue(dialogueData.dialogueList[nextDialogueIndex]);
+      setCurrentDialogueIndex(nextDialogueIndex);
+    } else {
+      console.log("End of dialogue reached");
+      handleEndDialogue();
+    }
+  } else {
+    console.error("No dialogue data available or invalid option index");
+  }
+};
+
+const handleCloseNoteModal = () => {
+  setShowModalNote(false);
+  
+  // Add the note to interacted items
+  const itemName = "note1"; // Or any other identifier for the note
+  if (!interactedItems.includes(itemName)) {
+    setInteractedItems([...interactedItems, itemName]);
+    console.log("Item interacted:", itemName);
+  }
+  setCurrentSelectedItem(itemName);
+};
+
 
 // Toggle control mode
 const toggleControlMode = () => {
@@ -69,14 +206,15 @@ const toggleControlMode = () => {
   };
 
   const toggleDrawer = () => {
+    
     setDrawerOpen(!isDrawerOpen);
   };
 
-  const toggleImage = () => {
-    console.log("Current state before toggle:", isImageOpen);
-    setIsImageOpen(!isImageOpen);
-    console.log("State after toggling:", !isImageOpen);
-  };
+  // const toggleImage = () => {
+  //   console.log("Current state before toggle:", isImageOpen);
+  //   setIsImageOpen(!isImageOpen);
+  //   console.log("State after toggling:", !isImageOpen);
+  // };
 
   const handleItemInteraction = (itemName) => {
     console.log("Item interacted:", itemName);
@@ -87,13 +225,13 @@ const toggleControlMode = () => {
     }
     
     if (itemName === "Hotspot") {
-      setIsImageOpen(!isImageOpen);
+      setCurrentSelectedItem(itemName);
     }
-    setCurrentSelectedItem(itemName);
   };
 
   const itemsDetails = {
-    EggBox: "This eggbox is weird, I don't think I have any use of it"
+    EggBox: "This eggbox is weird, I don't think I have any use of it",
+    note1: "This is an important note I found. It might be useful later."
   };
   
   const getItemDetails = (itemName) => {
@@ -102,13 +240,18 @@ const toggleControlMode = () => {
   };
 
   const onLook = (itemName) => {
-    // Implement the "Look" functionality based on itemName
-    console.log(`Looking at ${itemName}`);
-    // Open a modal or show information about itemName
+  console.log(`Looking at ${itemName}`);
+  
+  if (itemName === 'note1') {
+    // If the item is 'note1', open the image modal
+    setShowModalImage(true); // Assuming this will trigger the image modal
+  } else {
+    // For 'EggBox' or any other items, show the regular dialogue
     setIsDialogueVisible(true);
     const details = getItemDetails(itemName); 
-    setDialogContent(details); 
-  };
+    setDialogContent(details);
+  }
+};
   
   const onUseItem = (itemName) => {
 
@@ -134,23 +277,33 @@ const toggleControlMode = () => {
   const handleTouchEnd = (point) => {
     const spherical = new Three.Spherical().setFromVector3(point);
     setSphericalCoords(spherical); // Set the spherical coordinates for the zoom
-    setZoomLevel(30); // Set the zoom level you want after touching the hotspot
+    setZoomLevel(15); // Set the zoom level you want after touching the hotspot
     setZoomActive(true);
+    // setIsImageOpen(true);
   };
 
   const handleBackButtonClick = () => {
     
-    if (cameraRef.current) {
+    if (cameraRef.current && initialCameraState) {
       cameraRef.current.position.copy(initialCameraState.position);
       cameraRef.current.quaternion.copy(initialCameraState.quaternion);
-  
-      // Reset FOV if you're using it to zoom
-      // Assuming initialFOV is a stored value that represents the initial field of view of the camera
-      cameraRef.current.fov = initialFOV;
-      setZoomLevel(initialFOV); 
+      cameraRef.current.fov = initialCameraState.fov;
       cameraRef.current.updateProjectionMatrix();
+  
+      setZoomLevel(initialCameraState.fov);
       setZoomActive(false);
     }
+  };
+
+  const handleCloseModal = () => {
+    setIsImageOpen(false);
+    handleBackButtonClick();
+    
+  }
+  
+  const onZoomComplete = () => {
+    console.log("Zoom complete, opening modal");
+  setIsImageOpen(true);
   };
 
   
@@ -158,34 +311,45 @@ const toggleControlMode = () => {
 const handleRotate = (angle) => {
   setRotationAngle(prevAngle => prevAngle + angle);
 };
-
-// In your render method, pass rotationAngle to your 3D model component
-// <Your3DModelComponent rotation={rotationAngle} ... />
-
-
+console.log("Hello", isImageOpen) 
 
   return (
     <View style={{ flex: 1, position: 'relative' }}>
-      
       <Canvas camera={{ position: [0, 0, 19] }}>
         <SetupCamera setCameraRef={setCameraRef} />
         <ambientLight />
         <pointLight position={[1, 15, 15]} />
-        <CameraControls controlMode={controlMode} rotation={rotationAngle} />
+        {!showModalNote && !isDialogueActive && !isImageOpen && <CameraControls controlMode={controlMode} rotation={rotationAngle} isDialogueActive={isDialogueActive}  />}
         <Suspense fallback={null}>
         <ImageSphere />
         </Suspense>
         <Suspense fallback={null}>
-          <EggBox onInteract={handleItemInteraction} onPress={toggleDrawer}  showObject={showObject} setShowObject={setShowObject} usedItems={usedItems} />
-          <Hotspot saveCameraState={saveCameraState} onClick={handleItemInteraction} onTouchEnd={handleTouchEnd} /> 
+        {!showModalNote && !isDialogueActive && <EggBox onInteract={handleItemInteraction} onPress={toggleDrawer}  showObject={showObject} setShowObject={setShowObject} usedItems={usedItems} />}
+        {!showModalNote && !isDialogueActive && <Hotspot saveCameraState={saveCameraState} onClick={handleItemInteraction} onTouchEnd={handleTouchEnd} /> }
         </Suspense>
-        {sphericalCoords && <ZoomControls targetSphericalCoords={sphericalCoords} zoomLevel={zoomLevel} zoomActive={zoomActive} />}
+        {sphericalCoords && <ZoomControls 
+            targetSphericalCoords={sphericalCoords} 
+            zoomLevel={zoomLevel} 
+            zoomActive={zoomActive}
+            onZoomComplete={onZoomComplete} 
+          />}
       </Canvas>
-      <CharacterImage />
+      
+      {isImageOpen && <ImageModal isVisible={isImageOpen} onClose={handleCloseModal} /> }
+      
+      <View >
+        <ResponseBox currentDialogue={currentDialogue} handleOptionPress={handleOptionPress} />
+      </View>
+      {isDialogueActive && <CharacterImage characterEmotion={characterEmotion} />}
+      {isDialogueActive && <DialogueBox currentDialogue={currentDialogue} characterName={currentDialogue?.name} handleOptionPress={handleNextDialogue}/>}
       <TouchControls onRotate={handleRotate} />
-
-      {/* <ImageModal isVisible={isImageOpen} onClose={toggleImage} /> */}
-
+      
+        <Note
+          onPress={handleCloseNoteModal}
+          showNote={showModalNote}
+          onClick={toggleDrawer}
+          usedItems={usedItems}
+        />
       {isDrawerOpen && (
         <TouchableWithoutFeedback onPress={toggleDrawer}>
           <View style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.7)', justifyContent: 'center' }}>
@@ -193,16 +357,17 @@ const handleRotate = (angle) => {
           </View>
         </TouchableWithoutFeedback>
       )}
+      {!showModalNote && !isDialogueActive && (
       <TouchableOpacity style={{ position: 'absolute', top: 30, left: 20 }} onPress={toggleDrawer}>
         <Image source={require('./assets/push_ui.png')} style={{ width: 40, height: 40 }} />
-      </TouchableOpacity>
-      <TouchableOpacity style={{ position: 'absolute', top: 30, right: 20 }} onPress={toggleControlMode}>
+      </TouchableOpacity> 
+      )}
+
+      {!showModalNote && !isDialogueActive && (<TouchableOpacity style={{ position: 'absolute', top: 30, right: 20 }} onPress={toggleControlMode}>
         <Image source={require('./assets/push_ui.png')} style={{ width: 40, height: 40 }} />
       </TouchableOpacity>
-    
-        
-   
-
+      )}
+      <ImageModal2 isVisible={showModalImage} onClose={() => setShowModalImage(false)} />
       {isDialogueVisible && (
         <Dialoguebox1
           isVisible={isDialogueVisible}
@@ -210,10 +375,11 @@ const handleRotate = (angle) => {
           onClose={() => setIsDialogueVisible(false)}
         />
       )}
-      <TouchableOpacity onPress={handleBackButtonClick} style={{position: 'absolute', bottom: 50, right: 20}}>
+      {!showModalNote && !isDialogueActive && (<TouchableOpacity onPress={handleBackButtonClick} style={{position: 'absolute', bottom: 50, right: 20}}>
       <Image source={require('./assets/push_ui.png')} style={{ width: 40, height: 40 }} />
       </TouchableOpacity>
+  )}
     </View>
   );
-}
+};
 

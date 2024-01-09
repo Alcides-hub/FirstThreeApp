@@ -1,0 +1,7 @@
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /tutorial/{document=**} {
+      allow read: if true; // Update this rule based on your specific access requirements
+    }
+  }
+}

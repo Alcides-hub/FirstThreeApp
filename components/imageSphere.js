@@ -20,7 +20,7 @@ function ImageSphere() {
   
     return (
       <mesh ref={mesh}>
-        <sphereGeometry args={[600, 123, 32]} />
+        <sphereGeometry args={[600, 123, 15]} />
         <meshBasicMaterial map={texture} side={Three.BackSide} />
       </mesh>
     );

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { Gyroscope } from 'expo-sensors';
 
 
@@ -12,7 +12,6 @@ const useGyroscope = (callback) => {
           callback({ x, y, z });
         }
       };
-  
       Gyroscope.addListener(handleGyroscopeData);
       Gyroscope.setUpdateInterval(16); // Adjust the update interval as needed (e.g., 16ms for 60 FPS)
   
@@ -20,7 +19,7 @@ const useGyroscope = (callback) => {
         isMounted = false;
         Gyroscope.removeAllListeners();
       };
-    }, [callback]);
+    }, []);
   };
 
   export default useGyroscope;
