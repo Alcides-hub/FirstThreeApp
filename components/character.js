@@ -1,7 +1,8 @@
 import React from 'react'
 import { View, Image, StyleSheet } from 'react-native'
 
-const CharacterImage = ({ characterEmotion, style }) => {
+const CharacterImage = ({ characterEmotion, customCharacterStyle }) => {
+  console.log('Custom Style in CharacterImage:', customCharacterStyle);
   let image;
   const welcomeImage = require('../assets/character/welcome.png');
   const talkingImage = require('../assets/character/talking.png');
@@ -23,7 +24,7 @@ return (
   <View>
   <Image 
   source={image}
-  style={styles.image}
+  style={[styles.image, customCharacterStyle]}
   resizeMode='contain'
   />
   </View>

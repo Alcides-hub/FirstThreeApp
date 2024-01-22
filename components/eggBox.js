@@ -6,8 +6,9 @@ import { TextureLoader } from 'three';
 
 
 function EggBox({onInteract, showObject, setShowObject, onPress}) {
-    const [active, setActive] = useState(false);
-    
+    const [active, setActive] = useState(true);
+    // Determine whether to render based on displayMode and other conditions
+   
     
     
     const [cavity, diffuse, normals, occlusion, rough] = useLoader(TextureLoader, [
@@ -19,26 +20,22 @@ function EggBox({onInteract, showObject, setShowObject, onPress}) {
     ]);
   
     const handleInteraction = (event) => {
-      console.log("EggBox clicked"); // Debug log
-      // This function could be passed in via props, or 
-      // you can manage the state within this component itself.
+      console.log("EggBox clicked");
+    
+      // Always trigger interaction handlers
       if (typeof onInteract === 'function') {
         onInteract("EggBox");
       }
-      // If already active (i.e., has been clicked once and is rotating), hide the EggBox
-      if (active) {
-        setShowObject(true);
-    }
       if (onPress) {
         onPress();
       }
-      setActive(!active);
+    
+      // Toggle the active state for visibility
+      // setActive(!active);
+    
       event.stopPropagation();
     };
-  
-    
-  
-  
+
       const obj = useLoader(
       OBJLoader,
       require('../assets/egg-box/BoiteOeufs_LOW_UV.obj'),
@@ -59,57 +56,11 @@ function EggBox({onInteract, showObject, setShowObject, onPress}) {
       }
     });
   
-    // Update material color based on 'active' state
-    // useEffect(() => {
-    //   if (active) {
-    //     // Store the original color when object becomes active
-    //     originalColor.current = meshMaterial.current.color.clone();
-    //     meshMaterial.current.color.set('green');
-    //   } else {
-    //     // Reset to original color when object becomes inactive
-    //     if (originalColor.current) {
-    //       meshMaterial.current.color.copy(originalColor.current);
-    //     }
-    //   }
-    // }, [active]);
-  
-    
-  
-  
     const mesh = useRef();
-  // const rotationY = useRef(0); // This will keep track of the current Y rotation.
-  // const targetRotationY = useRef(0);  // New ref to store the target rotation.
   
-  // useEffect(() => {
-  //   if (active) {
-  //       targetRotationY.current = Math.PI;  // 180 degrees in radians.
-  //   } else {
-  //       targetRotationY.current = 0;  // Reset rotation.
-  //   }
-  // }, [active]);
-  
-  // const rotationSpeed = 0.03; // Adjust this value for desired rotation speed
-  
-  // useFrame((state, delta) => {
-  //   if (active) {
-  //     rotationY.current += delta;
-  //     if (rotationY.current >= 2 * Math.PI) {
-  //       rotationY.current -= 2 * Math.PI;
-  //     }
-  //   } else {
-  //     rotationY.current -= rotationSpeed;
-  //     if (rotationY.current <= 0) {
-  //       rotationY.current = 0;
-  //     }
-  //   }
-  
-  //   if (mesh.current) {
-  //     mesh.current.rotation.y = rotationY.current;
-  //   }
-  // });
       
     return (
-      showObject &&
+      active &&
       <mesh  
       ref={mesh} 
       onClick={handleInteraction}
