@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { View, Image, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
 import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view';
@@ -13,10 +13,8 @@ return (
     <Modal
       isVisible={isVisible}
       onBackdropPress={onClose}
-      animationIn="slideInLeft"
-      animationOut="slideOutLeft"
-      backdropColor='black'
-      backdropOpacity={0.7}
+      animationIn="fadeIn"
+      animationOut="fadeOut"
     >
         <View style={styles.modalContentContainer}>
         <ReactNativeZoomableView
@@ -27,9 +25,10 @@ return (
         ><Image 
         source={image} 
         style={styles.imageStyle}
+        
       />
        <TouchableOpacity onPress={onClose}>
-      <Text style={{ color: 'white'}}>Close</Text>
+      <Text style={{ color: 'grey'}}>X</Text>
     </TouchableOpacity>
       </ReactNativeZoomableView>
         </View>
@@ -41,16 +40,17 @@ return (
 const styles = StyleSheet.create({
     modalContentContainer: {
        
-        height: 540,
+        height: 340,
         width: 740,
     
         alignSelf: 'center', // Aligns the container in the center of the modal
         justifyContent: 'center', // Centers the content vertically within the container
       },
       imageStyle: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'contain'
+        width: '70%',
+        height: '60%',
+        resizeMode: 'contain',
+        marginLeft: 70,
       },
   });
 

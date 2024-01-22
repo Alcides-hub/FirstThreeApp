@@ -5,7 +5,7 @@ import * as Three from 'three';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCrosshairs} from '@fortawesome/free-solid-svg-icons';
 import { TextureLoader } from 'three';
-import SideDrawer from './components/side_drawer';
+import SideDrawerOption from './components/sideDrawer';
 import Hotspot from './components/hotspot';
 import ImageModal from './modal/imageModal';
 import Dialoguebox1 from './components/dialogue_box1';
@@ -22,9 +22,12 @@ import { initializeApp } from "firebase/app";
 import * as Font from 'expo-font';
 import DialogueBox from './components/dialogueBox';
 import ResponseBox from './components/ResponseBox';
-import { getFirestore, doc, getDoc } from "firebase/firestore/lite";
+import { doc, getDoc } from "firebase/firestore/lite";
 import Note from './components/Note';
 import ImageModal2 from './modal/imageModal2';
+import { NativeBaseProvider } from 'native-base';
+import Modal from 'react-native-modal';
+
 
 
 
@@ -60,7 +63,7 @@ export default function App() {
   const [CurrentSelectedItem, setCurrentSelectedItem] = useState(null);
   const [isDialogueVisible, setIsDialogueVisible] = useState(false);
   const [dialogContent, setDialogContent] = useState(''); // Add this state for the dialogue content
-  const [showObject, setShowObject] = useState(true);
+  const [showObject, setShowObject] = useState(false);
   const [usedItems, setUsedItems] = useState({}); // New state to track used items
   // State for the spherical coordinates
   const [sphericalCoords, setSphericalCoords] = useState(new Three.Spherical());
@@ -84,6 +87,8 @@ const [characterEmotion, setCharacterEmotion] = useState(null);
 const [isDialogueActive, setIsDialogueActive] = useState(false);
 const [showModalNote, setShowModalNote] = useState(false);
 const [showModalImage, setShowModalImage] = useState(false);
+const [showEggBoxModal, setShowEggBoxModal] = useState(false);
+
 
 
 // Fetch the dialogue data from Firestore once
@@ -218,6 +223,7 @@ const toggleControlMode = () => {
 
   const handleItemInteraction = (itemName) => {
     console.log("Item interacted:", itemName);
+   
   
     // Avoid adding duplicate items
     if (!interactedItems.includes(itemName)) {
@@ -226,6 +232,7 @@ const toggleControlMode = () => {
     
     if (itemName === "Hotspot") {
       setCurrentSelectedItem(itemName);
+      
     }
   };
 
@@ -241,21 +248,24 @@ const toggleControlMode = () => {
 
   const onLook = (itemName) => {
   console.log(`Looking at ${itemName}`);
-  
-  if (itemName === 'note1') {
+  if (itemName === 'EggBox') {
+    setShowEggBoxModal(true);
+    // setIsDialogueVisible(true);
+    // const details = getItemDetails(itemName); 
+    // setDialogContent(details);
+    
+  } else if (itemName === 'note1') {
     // If the item is 'note1', open the image modal
     setShowModalImage(true); // Assuming this will trigger the image modal
-  } else {
-    // For 'EggBox' or any other items, show the regular dialogue
-    setIsDialogueVisible(true);
-    const details = getItemDetails(itemName); 
-    setDialogContent(details);
-  }
+     // setIsDialogueVisible(true);
+    //  const details = getItemDetails(itemName); 
+    // setDialogContent(details);
+  } 
 };
   
   const onUseItem = (itemName) => {
 
-    setShowObject(false);
+    setShowObject(true);
     // Implement the "Use" functionality based on itemName
     console.log(`Using ${itemName}`);
     // Perform an action with itemName
@@ -314,6 +324,7 @@ const handleRotate = (angle) => {
 console.log("Hello", isImageOpen) 
 
   return (
+    <NativeBaseProvider>
     <View style={{ flex: 1, position: 'relative' }}>
       <Canvas camera={{ position: [0, 0, 19] }}>
         <SetupCamera setCameraRef={setCameraRef} />
@@ -353,13 +364,13 @@ console.log("Hello", isImageOpen)
       {isDrawerOpen && (
         <TouchableWithoutFeedback onPress={toggleDrawer}>
           <View style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.7)', justifyContent: 'center' }}>
-            <SideDrawer isOpen={isDrawerOpen} items={interactedItems} selectedItem={CurrentSelectedItem} onLook={onLook} onUseItem={() => {onUseItem(CurrentSelectedItem); }}  />
+            <SideDrawerOption isOpen={isDrawerOpen} items={interactedItems} selectedItem={CurrentSelectedItem} onLook={onLook} onUseItem={() => {onUseItem(CurrentSelectedItem); }}  />
           </View>
         </TouchableWithoutFeedback>
       )}
       {!showModalNote && !isDialogueActive && (
       <TouchableOpacity style={{ position: 'absolute', top: 30, left: 20 }} onPress={toggleDrawer}>
-        <Image source={require('./assets/push_ui.png')} style={{ width: 40, height: 40 }} />
+        <Image source={require('./assets/inventory.png')} style={{ width: 50, height: 50 }} />
       </TouchableOpacity> 
       )}
 
@@ -376,10 +387,45 @@ console.log("Hello", isImageOpen)
         />
       )}
       {!showModalNote && !isDialogueActive && (<TouchableOpacity onPress={handleBackButtonClick} style={{position: 'absolute', bottom: 50, right: 20}}>
-      <Image source={require('./assets/push_ui.png')} style={{ width: 40, height: 40 }} />
+      <Image source={require('./assets/back.png')} style={{ width: 50, height: 50 }} />
       </TouchableOpacity>
   )}
+  {showEggBoxModal && (
+  <Modal isVisible={showEggBoxModal} backdropColor='transparent' animationIn="fadeIn" // Change the animation to a simple fade in
+  animationOut="fadeOut" // Change the animation to a simple fade out
+  style={styles.modalContainer}>
+<View style={styles.imageContainer}>
+<TouchableOpacity onPress={() => setShowEggBoxModal(false)}>
+   <Image
+     source={require("./image/eggBox.jpg")} // Replace with the actual path
+     alt="EggBox"
+     style={styles.eggBoxImage}
+   />
+   </TouchableOpacity>
+</View>
+</Modal>
+)}
     </View>
+    </NativeBaseProvider>
   );
 };
 
+const styles = StyleSheet.create({
+  modalContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageContainer: {
+    width: '80%', // Adjust based on your preference
+    height: '60%', // Adjust based on your preference
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20, // Optional, for rounded corners
+    marginLeft: 70,
+  },
+  eggBoxImage: {
+    width: 200,
+    height: 200,
+    resizeMode: 'contain', // This ensures the aspect ratio is maintained
+  },
+});

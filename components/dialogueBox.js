@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import TypeWriter from 'react-native-typewriter';
 import { useFonts, PatuaOne_400Regular } from "@expo-google-fonts/patua-one";
  
-const DialogueBox = ({currentDialogue, characterName, handleOptionPress}) => {
+const DialogueBox = ({currentDialogue, characterName, handleOptionPress, customDialogueStyle, onDialogueComplete}) => {
   const [patuaLoaded] = useFonts({
     PatuaOne_400Regular,
   });
@@ -17,12 +17,12 @@ const DialogueBox = ({currentDialogue, characterName, handleOptionPress}) => {
   
   return (
     
-    <TouchableOpacity style={styles.transparentBackgroundisLandscape} onPress={handleOptionPress}>
+    <TouchableOpacity style={[styles.transparentBackgroundisLandscape, customDialogueStyle]} onPress={handleOptionPress}>
       <View style={styles.nameContainer}>
         <Text style={styles.nameText}>{characterName}</Text>
       </View>
     <View style={styles.dialogueBoxText}>
-      <TypeWriter typing={1} minDelay={-100}>
+      <TypeWriter typing={1} minDelay={-100} onTypingEnd={onDialogueComplete}>
         <Text style={styles.dialogueText}>{currentDialogue.dialogue}</Text>
       </TypeWriter>
     </View>

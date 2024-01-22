@@ -1,5 +1,5 @@
 import React, {useRef, useState, useEffect} from 'react';
-import { View, Button, Text, StyleSheet, FlatList, Image, TouchableOpacity, TouchableWithoutFeedback  } from 'react-native';
+import { View, ImageBackground, Text, StyleSheet, FlatList, Image, TouchableOpacity, TouchableWithoutFeedback  } from 'react-native';
 import my3Dobjects from '../data/3d_objects_list.json';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
@@ -11,7 +11,22 @@ const SideDrawer = ({ isOpen, items, onLook, onUseItem, selectedItem }) => {
   const [currentIndex, setCurrentIndex] = React.useState(1);
   const [currentViewItem, setCurrentViewItem] = useState(null);
   const flatListRef = useRef(null);
+  const drawerBackgroundImage = require('../assets/mainBoard.png'); // Adjust the path
  
+  const [chosenItem, setChosenItem] = useState(null);
+
+  // Handle pressing an item
+  const handlePressItem = (item) => {
+    setChosenItem(item);
+    selectedItem(item);
+  };
+  
+
+// Define size for the arrows based on screen size
+const arrowSize = {
+  width: window.width * 0.1,
+  height: window.height * 0.1,
+};
 
 
   const imageMapper = {
@@ -70,7 +85,7 @@ const scrollToPrevItem = () => {
 
 const renderItem = ({ item }) => (
   <View style={styles.flatListItem}>
-    <Text style={styles.itemText}>{item.name}</Text>
+    {/* <Text style={styles.itemText}>{item.name}</Text> */}
     <Image source={item.image} style={styles.itemImage} />
     <View style={styles.buttonContainer}>
     <TouchableOpacity 
@@ -86,13 +101,15 @@ const renderItem = ({ item }) => (
   </View>
 );
 
-
 const isItemSelected = selectedItem != null;
-
 
     return (
   <TouchableWithoutFeedback onPress={(e) => e.preventDefault()}>
-    <View style={[styles.drawer, isOpen ? styles.openDrawer : styles.closedDrawer]}>
+    <ImageBackground
+        source={drawerBackgroundImage}
+        style={[styles.drawer, isOpen ? styles.openDrawer : styles.closedDrawer]}
+        imageStyle={styles.backgroundImage}
+      >
       <TouchableOpacity style={styles.arrowLeft} onPress={scrollToNextItem}>
         <FontAwesomeIcon icon={faChevronLeft} />
       </TouchableOpacity>
@@ -113,23 +130,24 @@ const isItemSelected = selectedItem != null;
       <TouchableOpacity style={styles.arrowRight} onPress={scrollToPrevItem}>
         <FontAwesomeIcon icon={faChevronRight} />
       </TouchableOpacity>
-    </View>
+    </ImageBackground>
   </TouchableWithoutFeedback>
 );
     }
 
   const styles = StyleSheet.create({
     drawer: {
-      width: 300, // Just a value, adjust as needed
-      height: 100,
       position: 'absolute',
       zIndex: 1000,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: 'rgba(255, 255, 255, 0.6)',
       padding: 3,
       paddingTop: 20,
       borderRadius: 10, 
+    },
+    backgroundImage: {
+      height: 300,
+      width: 500,
     },
     flatListItem: {
       width: 200,
