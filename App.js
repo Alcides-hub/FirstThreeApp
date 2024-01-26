@@ -27,7 +27,9 @@ import Note from './components/Note';
 import ImageModal2 from './modal/imageModal2';
 import { NativeBaseProvider } from 'native-base';
 import Modal from 'react-native-modal';
-
+import MonsterScene from './components/MonsterScene';
+import { Video } from 'expo-av';
+import { Asset } from 'expo-asset';
 
 
 
@@ -88,8 +90,47 @@ const [isDialogueActive, setIsDialogueActive] = useState(false);
 const [showModalNote, setShowModalNote] = useState(false);
 const [showModalImage, setShowModalImage] = useState(false);
 const [showEggBoxModal, setShowEggBoxModal] = useState(false);
+const [isOrderCorrect, setIsOrderCorrect] = useState(false);
+const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
 
+  const handleCorrectOrder = () => {
+    console.log("handleCorrectOrder triggered");
+    setIsOrderCorrect(true);  // Update state based on child component's interaction
+    setIsVideoPlaying(true);
+  };
+
+  // 
+  const handlePlaybackStatusUpdate = (playbackStatus) => {
+    if (playbackStatus.didJustFinish) {
+      // The video has finished playing
+      console.log("Video finished playing");
+      setIsVideoPlaying(false);
+    }
+  
+    // You can also handle other status updates like buffering, errors, etc.
+    if (playbackStatus.isBuffering) {
+      console.log("Video is buffering");
+    }
+  
+    if (playbackStatus.error) {
+      console.error("Video playback error:", playbackStatus.error);
+    }
+  };
+
+  // useEffect(() => {
+  //   if (isOrderCorrect && isVideoPlaying ) {
+  //     const videoElement = document.getElementbyId('monsterVideo');
+  //     videoElement.onEnded = () => {
+  //       setIsVideoPlaying();
+  //     }
+  //   }
+  // }, [isOrderCorrect, isVideoPlaying]);
+
+
+  useEffect(() => {
+    Asset.loadAsync(require('./assets/videos/kasa_appear.mp4'));
+  }, []);
 
 // Fetch the dialogue data from Firestore once
 useEffect(() => {
@@ -173,6 +214,8 @@ const handleOptionPress = async (optionIndex) => {
 };
 
 const handleCloseNoteModal = () => {
+  console.log("handleCloseNoteModal called");
+
   setShowModalNote(false);
   
   // Add the note to interacted items
@@ -337,6 +380,9 @@ console.log("Hello", isImageOpen)
         <Suspense fallback={null}>
         {!showModalNote && !isDialogueActive && <EggBox onInteract={handleItemInteraction} onPress={toggleDrawer}  showObject={showObject} setShowObject={setShowObject} usedItems={usedItems} />}
         {!showModalNote && !isDialogueActive && <Hotspot saveCameraState={saveCameraState} onClick={handleItemInteraction} onTouchEnd={handleTouchEnd} /> }
+        
+        {isOrderCorrect  && !isVideoPlaying && <MonsterScene />}
+        
         </Suspense>
         {sphericalCoords && <ZoomControls 
             targetSphericalCoords={sphericalCoords} 
@@ -344,10 +390,11 @@ console.log("Hello", isImageOpen)
             zoomActive={zoomActive}
             onZoomComplete={onZoomComplete} 
           />}
+        
       </Canvas>
       
-      {isImageOpen && <ImageModal isVisible={isImageOpen} onClose={handleCloseModal} /> }
-      
+      {isImageOpen && <ImageModal isVisible={isImageOpen} onClose={handleCloseModal} onCorrectOrder={handleCorrectOrder} /> }
+      {/* {isOrderCorrect && <Text>Monster Scene should be here</Text>} */}
       <View >
         <ResponseBox currentDialogue={currentDialogue} handleOptionPress={handleOptionPress} />
       </View>
@@ -405,6 +452,22 @@ console.log("Hello", isImageOpen)
 </View>
 </Modal>
 )}
+
+{isVideoPlaying && isOrderCorrect && (
+        <Video
+        source={require('./assets/videos/kasa_appear.mp4')}
+        rate={1.0}
+        volume={1.0}
+        isMuted={false}
+        resizeMode="cover"
+        shouldPlay
+        isLooping={false}
+        useNativeControls
+        style={styles.video}
+        onPlaybackStatusUpdate={handlePlaybackStatusUpdate} 
+        onError={(e) => console.log('Video Error:', e)}
+        />
+      )}
     </View>
     </NativeBaseProvider>
   );
@@ -428,4 +491,8 @@ const styles = StyleSheet.create({
     height: 200,
     resizeMode: 'contain', // This ensures the aspect ratio is maintained
   },
+  video: {
+    height: '100%',
+    width: '100%',
+  }
 });

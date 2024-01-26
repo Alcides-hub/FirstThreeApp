@@ -29,7 +29,7 @@ console.log("Image Height:", image.height);
   
   
 
-function ImageModal({ isVisible, onClose }) {
+function ImageModal({ isVisible, onClose, onCorrectOrder }) {
   const imageWidth = 450;
   const imageHeight = 300;
   const umbrellaWidth = 32.3;
@@ -50,7 +50,9 @@ function ImageModal({ isVisible, onClose }) {
 
    const customCharacterStyle = styles.customCharacterStyle;
    const customDialogueStyle = styles.customDialogueStyle;
-   // Fetch the dialogue data from Firestore once
+
+   
+   
    const fetchDialogue = async (dialogueId) => {
     try {
       const documentSnapshot = await getDoc(doc(db, "kasa_comments", dialogueId));
@@ -89,12 +91,21 @@ useEffect(() => {
       fetchDialogue(`kasa_erande_fail${newAttemptNumber}`);
       setIncorrectAttempts(newAttemptNumber);
     } else {
+      if (typeof onCorrectOrder === 'function') {
+        onCorrectOrder();
+        onClose();
+        console.log("Correct order achieved");
+      } else {
+        console.error("onCorrectOrder is not a function");
+      }
+
+      // These actions should happen regardless of whether onCorrectOrder is a function
       setIsDialogueActive(false);
       setIncorrectAttempts(0); // Reset attempts on success
     }
     setSelectedUmbrellas([]); // Reset for next attempt
   }
-}, [selectedUmbrellas]);
+}, [selectedUmbrellas, onCorrectOrder]);
 
         
 
@@ -108,7 +119,7 @@ const handleDialogueComplete = () => {
   // Logic to execute when dialogue is complete
   setTimeout(() => {
     setIsDialogueActive(false); // Hide the dialogue after 5 seconds
-  }, 3000); // 5000 milliseconds = 5 seconds
+  }, 2000); // 5000 milliseconds = 5 seconds
 };
 
 
@@ -194,6 +205,8 @@ React.useEffect(() => {
 </Modal>
   );
   }
+
+
 
 const styles = StyleSheet.create({
   customCharacterStyle: {
