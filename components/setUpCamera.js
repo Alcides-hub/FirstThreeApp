@@ -1,13 +1,12 @@
 import React, { useEffect } from 'react';
 import { useThree } from '@react-three/fiber/native';
 
-const SetupCamera = ({ setCameraRef }) => {
+const SetupCamera = ({ }) => {
   const { camera } = useThree();
   
   useEffect(() => {
-    camera.rotation.set(0, 0, -0.02); // Set the initial position
-    setCameraRef(camera);
-  }, [camera, setCameraRef]);
+    camera.rotation.set(0, 0, -0.02); 
+  }, [camera]);
 
   return null; // This component does not render anything
 };

@@ -1,12 +1,21 @@
 import React from 'react';
 import { View, Image, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { setShowModalNote } from '../actions/dialogueActions';
+import { useSelector } from 'react-redux';
 
-const Note = ({ onPress, showNote }) => {
-  if (!showNote) return null;
+const Note = ({ }) => {
+  const showModalNote = useSelector(state => state.dialogue.showModalNote);
+  const dispatch = useDispatch();
+  if (!showModalNote) return null;
+
+  const handleCloseNoteModal = () => {
+    dispatch(setShowModalNote(false));
+  }
 
   return (
     <View style={styles.noteContainer}>
-      <TouchableOpacity style={styles.touchableContainer} onPress={() => onPress('Note')}>
+      <TouchableOpacity style={styles.touchableContainer} onPress={handleCloseNoteModal}>
         <Image
           source={require("../assets/paper_chaper_1.png")}
           style={styles.noteImage}
