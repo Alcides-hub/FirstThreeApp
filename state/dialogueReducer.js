@@ -5,6 +5,7 @@ const initialState = {
     error: null,
     currentDialogueIndex: 0, // Add this line
     showModalNote: false,
+    showEggBox: false,
   };
 
 const dialogueReducer = (state = initialState, action) => {
@@ -52,7 +53,13 @@ const dialogueReducer = (state = initialState, action) => {
                     ...state,
                     showModalNote: action.payload,
                 };
-  
+            case 'SET_SHOW_EGG_BOX':
+                return {
+                    ...state,
+                    isDialogueVisible: false,
+                    showModalNote: false,
+                    showEggBox: action.payload,
+                };
         default:
             return state;
     }

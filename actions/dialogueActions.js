@@ -15,6 +15,7 @@ const FETCH_DIALOGUE_FAILURE = 'FETCH_DIALOGUE_FAILURE';
 const SET_CURRENT_DIALOGUE_INDEX = 'SET_CURRENT_DIALOGUE_INDEX';
 const HANDLE_END_DIALOGUE = 'HANDLE_END_DIALOGUE';
 const SET_SHOW_MODAL_NOTE = 'SET_SHOW_MODAL_NOTE';
+const SET_SHOW_EGG_BOX = 'SET_SHOW_EGG_BOX';
 
 
 // Action Creators
@@ -39,6 +40,11 @@ export const setCurrentDialogueIndex = (index) => ({
 
 export const setShowModalNote = (isVisible) => ({
   type: SET_SHOW_MODAL_NOTE,
+  payload: isVisible,
+})
+
+export const setShowEggBox = (isVisible) => ({
+  type: SET_SHOW_EGG_BOX,
   payload: isVisible,
 })
 
