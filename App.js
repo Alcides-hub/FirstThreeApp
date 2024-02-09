@@ -27,9 +27,11 @@ import Note from './components/Note';
 import ImageModal2 from './modal/imageModal2';
 import { NativeBaseProvider } from 'native-base';
 import Modal from 'react-native-modal';
-import MonsterScene from './components/MonsterScene';
+import ErrorBoundary from './components/ErrorBoundary';
 import { Video } from 'expo-av';
 import { Asset } from 'expo-asset';
+import MonsterScene from './components/MonsterScene';
+
 
 
 
@@ -93,44 +95,32 @@ const [showEggBoxModal, setShowEggBoxModal] = useState(false);
 const [isOrderCorrect, setIsOrderCorrect] = useState(false);
 const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
+const handleCorrectOrder = () => {
+  console.log("handleCorrectOrder triggered");
+  setIsOrderCorrect(true);  // Update state based on child component's interaction
+  setIsVideoPlaying(true);
+};
 
-  const handleCorrectOrder = () => {
-    console.log("handleCorrectOrder triggered");
-    setIsOrderCorrect(true);  // Update state based on child component's interaction
-    setIsVideoPlaying(true);
-  };
+const handlePlaybackStatusUpdate = (playbackStatus) => {
+  if (playbackStatus.didJustFinish) {
+    // The video has finished playing
+    console.log("Video finished playing");
+    setIsVideoPlaying(false);
+  }
 
-  // 
-  const handlePlaybackStatusUpdate = (playbackStatus) => {
-    if (playbackStatus.didJustFinish) {
-      // The video has finished playing
-      console.log("Video finished playing");
-      setIsVideoPlaying(false);
-    }
-  
-    // You can also handle other status updates like buffering, errors, etc.
-    if (playbackStatus.isBuffering) {
-      console.log("Video is buffering");
-    }
-  
-    if (playbackStatus.error) {
-      console.error("Video playback error:", playbackStatus.error);
-    }
-  };
+  // You can also handle other status updates like buffering, errors, etc.
+  if (playbackStatus.isBuffering) {
+    console.log("Video is buffering");
+  }
 
-  // useEffect(() => {
-  //   if (isOrderCorrect && isVideoPlaying ) {
-  //     const videoElement = document.getElementbyId('monsterVideo');
-  //     videoElement.onEnded = () => {
-  //       setIsVideoPlaying();
-  //     }
-  //   }
-  // }, [isOrderCorrect, isVideoPlaying]);
+  if (playbackStatus.error) {
+    console.error("Video playback error:", playbackStatus.error);
+  }
+};
 
-
-  useEffect(() => {
-    Asset.loadAsync(require('./assets/videos/kasa_appear.mp4'));
-  }, []);
+useEffect(() => {
+  Asset.loadAsync(require('./assets/videos/kasa_appear.mp4'));
+}, []);
 
 // Fetch the dialogue data from Firestore once
 useEffect(() => {
@@ -214,8 +204,6 @@ const handleOptionPress = async (optionIndex) => {
 };
 
 const handleCloseNoteModal = () => {
-  console.log("handleCloseNoteModal called");
-
   setShowModalNote(false);
   
   // Add the note to interacted items
@@ -367,6 +355,7 @@ const handleRotate = (angle) => {
 console.log("Hello", isImageOpen) 
 
   return (
+    <ErrorBoundary>
     <NativeBaseProvider>
     <View style={{ flex: 1, position: 'relative' }}>
       <Canvas camera={{ position: [0, 0, 19] }}>
@@ -378,11 +367,9 @@ console.log("Hello", isImageOpen)
         <ImageSphere />
         </Suspense>
         <Suspense fallback={null}>
-        {!showModalNote && !isDialogueActive && <EggBox onInteract={handleItemInteraction} onPress={toggleDrawer}  showObject={showObject} setShowObject={setShowObject} usedItems={usedItems} />}
+        {!showModalNote && !isDialogueActive && <EggBox onInteract={handleItemInteraction} onPress={toggleDrawer}  showObject={showObject} setShowObject={setShowObject} usedItems={usedItems} />} 
         {!showModalNote && !isDialogueActive && <Hotspot saveCameraState={saveCameraState} onClick={handleItemInteraction} onTouchEnd={handleTouchEnd} /> }
-        
-        {isOrderCorrect  && !isVideoPlaying && <MonsterScene />}
-        
+        {isOrderCorrect && !isVideoPlaying && <MonsterScene />}
         </Suspense>
         {sphericalCoords && <ZoomControls 
             targetSphericalCoords={sphericalCoords} 
@@ -390,11 +377,10 @@ console.log("Hello", isImageOpen)
             zoomActive={zoomActive}
             onZoomComplete={onZoomComplete} 
           />}
-        
       </Canvas>
       
-      {isImageOpen && <ImageModal isVisible={isImageOpen} onClose={handleCloseModal} onCorrectOrder={handleCorrectOrder} /> }
-      {/* {isOrderCorrect && <Text>Monster Scene should be here</Text>} */}
+      {isImageOpen && <ImageModal isVisible={isImageOpen} onClose={handleCloseModal} onCorrectOrder={handleCorrectOrder}/> }
+      
       <View >
         <ResponseBox currentDialogue={currentDialogue} handleOptionPress={handleOptionPress} />
       </View>
@@ -452,7 +438,6 @@ console.log("Hello", isImageOpen)
 </View>
 </Modal>
 )}
-
 {isVideoPlaying && isOrderCorrect && (
         <Video
         source={require('./assets/videos/kasa_appear.mp4')}
@@ -470,6 +455,7 @@ console.log("Hello", isImageOpen)
       )}
     </View>
     </NativeBaseProvider>
+    </ErrorBoundary>
   );
 };
 
