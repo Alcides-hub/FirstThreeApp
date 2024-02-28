@@ -17,6 +17,11 @@ import {Provider} from 'react-redux';
 import {store} from './state/store';
 import DialogueFetcher from './components/dialogueFetcher';
 import Note from './components/Note';
+import EggBox from './components/eggBox';
+import Hotspot from './components/hotspot';
+import ZoomControls from './components/zoomControls';
+// import AdminSetupComponent from './components/AdminSetupComponent';
+import SideDrawerOption from './components/sideDrawer';
 
 
   
@@ -42,10 +47,15 @@ import Note from './components/Note';
             <pointLight position={[1, 15, 15]} />
             <Suspense fallback={null}>
             <ImageSphere />
+            <EggBox/>
+            <Hotspot/>
             </Suspense>
+            <ZoomControls />
           </Canvas>
           <DialogueFetcher/>
           <Note />
+          <SideDrawerOption />
+          {/* <AdminSetupComponent /> */}
       </View>
     </NativeBaseProvider>
     </Provider>

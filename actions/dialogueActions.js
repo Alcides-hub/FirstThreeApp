@@ -16,6 +16,19 @@ const SET_CURRENT_DIALOGUE_INDEX = 'SET_CURRENT_DIALOGUE_INDEX';
 const HANDLE_END_DIALOGUE = 'HANDLE_END_DIALOGUE';
 const SET_SHOW_MODAL_NOTE = 'SET_SHOW_MODAL_NOTE';
 const SET_SHOW_EGG_BOX = 'SET_SHOW_EGG_BOX';
+const SET_SHOW_EGG_BOX_MODAL = 'SET_SHOW_EGG_BOX_MODAL';
+const SET_SHOW_MODAL_IMAGE = 'SET_SHOW_MODAL_IMAGE';
+const SET_INTERACTED_ITEM = 'SET_INTERACTED_ITEM';
+const SET_CURRENT_SELECTED_ITEM = 'SET_CURRENT_SELECTED_ITEM';
+const ADD_ITEM_USED = 'ADD_ITEM_USED';
+const TOGGLE_SIDE_DRAWER = 'TOGGLE_SIDE_DRAWER';
+const SET_ZOOM_PARAMS = 'SET_ZOOM_PARAMS';
+const SET_ZOOM_ACTIVE = 'SET_ZOOM_ACTIVE';
+const SET_ZOOM_COMPLETE = "SET_ZOOM_COMPLETE";
+const SET_IMAGE_OPEN = "SET_IMAGE_OPEN";
+const SAVE_CAMERA_STATE = "SAVE_CAMERA_STATE";
+const RESTORE_CAMERA_STATE = "RESTORE_CAMERA_STATE";
+const SET_SHOW_OBJECT = "SET_SHOW_OBJECT";
 
 
 // Action Creators
@@ -48,6 +61,11 @@ export const setShowEggBox = (isVisible) => ({
   payload: isVisible,
 })
 
+export const setShowEggBoxModal = (isVisible) => ({
+  type: SET_SHOW_EGG_BOX_MODAL,
+  payload: isVisible,
+})
+
 // Thunk Action Creator
 export const fetchDialogue = (dialogueId) => async (dispatch) => {
   dispatch(fetchDialogueStart());
@@ -70,3 +88,70 @@ export const handleEndDialogue = () => ({
   type: HANDLE_END_DIALOGUE,
   // You may or may not have a payload or other properties
 });
+
+export const setZoomParams = (sphericalCoords, zoomLevel) => ({
+  type: SET_ZOOM_PARAMS,
+  payload: { sphericalCoords, zoomLevel },
+});
+
+export const setZoomActive = (zoomActive) => ({
+  type: SET_ZOOM_ACTIVE,
+  payload: zoomActive,
+});
+
+export const setIsImageOpen = (isOpen) => ({
+  type: SET_IMAGE_OPEN,
+  payload: isOpen,
+});
+
+export const setZoomCompleted = (isCompleted) => ({
+  type: SET_ZOOM_COMPLETE,
+  payload: isCompleted,
+});
+
+
+// Redux Action Creator for setting an interacted item
+export const setInteractedItem = (ItemName) => ({
+  type: SET_INTERACTED_ITEM,
+  payload: ItemName,
+});
+
+
+export const setCurrentSelectedItem = (ItemName) => ({
+  type: SET_CURRENT_SELECTED_ITEM,
+  payload: ItemName,
+});
+
+export const addUsedItem = (itemName) => ({
+  type: ADD_ITEM_USED,
+  payload: itemName, // Corrected from Itemname to itemName for consistency
+});
+
+// Action to toggle SideDrawer visibility
+export const toggleSideDrawer = () => ({
+  type: TOGGLE_SIDE_DRAWER,
+});
+
+export const saveCameraState = (cameraState) => ({
+  type: SAVE_CAMERA_STATE,
+  payload: cameraState,
+})
+
+export const restoreCameraState = () => ({
+  type: RESTORE_CAMERA_STATE,
+})
+
+export const setShowModalImage = (isVisible) => ({
+  type: SET_SHOW_MODAL_IMAGE,
+  payload: isVisible,
+})
+
+export const setShowObject = (isVisible) => ({
+  type: SET_SHOW_OBJECT,
+  payload: isVisible,
+})
+
+
+
+
+

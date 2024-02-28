@@ -65,7 +65,7 @@
 //       ref={mesh} 
 //       onClick={handleInteraction}
 //       position={[28, -5, -109]} 
-//       rotation={[0, 0, 99]}>
+//       rotation={[0, 0, 99]}
 //         <primitive 
 //         object={obj} 
 //         scale={0.5} 
@@ -77,23 +77,36 @@
 //   export default EggBox;
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useFrame, useThree, useLoader } from '@react-three/fiber';
+import { useThree } from '@react-three/fiber/native';
 import * as Three from 'three';
 import { Asset } from 'expo-asset';
+import {useDispatch, useSelector} from 'react-redux';
+import {setInteractedItem, setCurrentSelectedItem, toggleSideDrawer} from '../actions/dialogueActions';
+import { pushInteractedItemToFirestore } from '../scripts/firestoreService';
 
-function EggBox({ onInteract, onPress }) {
-    // const mesh = useRef();
+
+function EggBox() {
+    const mesh = useRef();
+    const dispatch = useDispatch();
     const [imageTexture, setImageTexture] = useState(null);
+    const { showEggBox } = useSelector((state) => state.dialogue);
     const { invalidate } = useThree();
-    const degreesToRadians = (degrees) => degrees * (Math.PI / 180);
+    // const usedItems = useSelector(state => state.appState.usedItems);
 
-    const xRotation = degreesToRadians(0);
-    const yRotation = degreesToRadians(0);
-    const zRotation = degreesToRadians(0);
+    const handleItemInteraction = (ItemName) => {
+        console.log(ItemName); // Logging the interacted item's name for verification
+        dispatch(setInteractedItem(ItemName));
+        dispatch(setCurrentSelectedItem(ItemName));
+        pushInteractedItemToFirestore(ItemName);
+        dispatch(toggleSideDrawer());
+      };
 
-  
-
+     
+   
+    
+// Load texture once, regardless of conditions
     useEffect(() => {
+      console.log("image on!")
         async function loadTexture() {
             try {
                 const asset = Asset.fromModule(require('../assets/egg-box/pngwing2.png'));
@@ -113,28 +126,21 @@ function EggBox({ onInteract, onPress }) {
     if (!imageTexture) {
         return null;
     }
+  
+    
+      
+    if (showEggBox) {  
+      const degreesToRadians = (degrees) => degrees * (Math.PI / 180);
+      const xRotation = degreesToRadians(0);
+      const yRotation = degreesToRadians(0);
+      const zRotation = degreesToRadians(0);
 
-    // useFrame(() => {
-    //     mesh.current.rotation.y += 0.01;
-    // });
-
-    const handleInteraction = (event) => {
-        console.log("EggBox clicked");
-
-        if (typeof onInteract === 'function') {
-            onInteract("EggBox");
-        }
-        if (onPress) {
-            onPress();
-        }
-
-        event.stopPropagation();
-    };
+    
 
     return (
         <mesh
-            
-            onClick={handleInteraction}
+        ref={mesh} 
+            onPointerDown={() => handleItemInteraction("Eggbox")}
             position={[34, -2, -180]}
             rotation={[xRotation, yRotation, zRotation]}
             scale={4}
@@ -144,6 +150,11 @@ function EggBox({ onInteract, onPress }) {
             <meshStandardMaterial map={imageTexture} side={Three.DoubleSide} transparent={true}  />
         </mesh>
     );
+    } else {
+      // Return null or a placeholder if the conditions are not met
+      return null;
+  }
 }
+
 
 export default EggBox;

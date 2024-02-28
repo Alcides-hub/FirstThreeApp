@@ -55,9 +55,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 
-
-
-
 export default function App() {
   const [interactedItems, setInteractedItems] = useState([]);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
@@ -393,7 +390,7 @@ console.log("Hello", isImageOpen)
         
       </Canvas>
       
-      {isImageOpen && <ImageModal isVisible={isImageOpen} onClose={handleCloseModal} onCorrectOrder={handleCorrectOrder} /> }
+      
       {/* {isOrderCorrect && <Text>Monster Scene should be here</Text>} */}
       <View >
         <ResponseBox currentDialogue={currentDialogue} handleOptionPress={handleOptionPress} />
@@ -409,7 +406,7 @@ console.log("Hello", isImageOpen)
           usedItems={usedItems}
         />
       {isDrawerOpen && (
-        <TouchableWithoutFeedback onPress={toggleDrawer}>
+ 1       <TouchableWithoutFeedback onPress={toggleDrawer}>
           <View style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.7)', justifyContent: 'center' }}>
             <SideDrawerOption isOpen={isDrawerOpen} items={interactedItems} selectedItem={CurrentSelectedItem} onLook={onLook} onUseItem={() => {onUseItem(CurrentSelectedItem); }}  />
           </View>
@@ -438,7 +435,7 @@ console.log("Hello", isImageOpen)
       </TouchableOpacity>
   )}
   {showEggBoxModal && (
-  <Modal isVisible={showEggBoxModal} backdropColor='transparent' animationIn="fadeIn" // Change the animation to a simple fade in
+1  <Modal isVisible={showEggBoxModal} backdropColor='transparent' animationIn="fadeIn" // Change the animation to a simple fade in
   animationOut="fadeOut" // Change the animation to a simple fade out
   style={styles.modalContainer}>
 <View style={styles.imageContainer}>
