@@ -3,8 +3,16 @@
 // import * as Three from 'three';
 // import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 // import { TextureLoader } from 'three';
+// import { useState, useRef, Suspense, useEffect } from 'react';
+// import { useThree, useFrame, useLoader } from '@react-three/fiber/native';
+// import * as Three from 'three';
+// import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
+// import { TextureLoader } from 'three';
 
 
+// function EggBox({onInteract, showObject, setShowObject, onPress}) {
+//     const [active, setActive] = useState(true);
+//     // Determine whether to render based on displayMode and other conditions
 // function EggBox({onInteract, showObject, setShowObject, onPress}) {
 //     const [active, setActive] = useState(true);
 //     // Determine whether to render based on displayMode and other conditions

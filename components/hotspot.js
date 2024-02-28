@@ -63,7 +63,7 @@ useFrame(() => {
   }
 });
 
-  // const handleClick = () => {
+  //   const handleClick = () => {
   //   console.log("Hotspot clicked!");
   //   if (typeof onClick === 'function') {
   //       onClick("Hotspot"); // Pass "Hotspot" as the identifier
