@@ -1,27 +1,31 @@
 import { useRef, useEffect, useState } from 'react';
 import { useThree, useFrame } from '@react-three/fiber/native';
 import * as Three from 'three';
+import { useDispatch, useSelector} from 'react-redux';
+import { setIsImageOpen, setZoomParams, setZoomCompleted, setZoomActive } from '../actions/dialogueActions';
 
-function zoomControls({ targetSphericalCoords, zoomActive, zoomLevel = 20, zoomSpeed = 5, onZoomComplete}) {
+
+function zoomControls({ zoomSpeed = 5}) {
   const { camera } = useThree();
   const targetDirection = useRef(new Three.Vector3());
+  const dispatch = useDispatch();
   const initialFOV = useRef(camera.fov);
-  const zoomCompleteCalled = useRef(false); // Ref to track if onZoomComplete has been called
-  const [zoomCompleted, setZoomCompleted] = useState(false);
+  // const zoomCompleteCalled = useRef(false); // Ref to track if onZoomComplete has been called
+  // const [zoomCompleted, setZoomCompleted] = useState(false);
   const sphericalToVector = (spherical) => {
     const vector = new Three.Vector3();
     vector.setFromSpherical(spherical);
     return vector;
   };
+  const { zoomActive, zoomLevel, isImageOpen, onZoomComplete, sphericalCoords} = useSelector((state) => state.dialogue)
   
-
   // Set the target direction when targetSphericalCoords change
   useEffect(() => {
-    if (targetSphericalCoords) {
-      targetDirection.current = sphericalToVector(targetSphericalCoords);
+    if (sphericalCoords) {
+      targetDirection.current = sphericalToVector(sphericalCoords);
       camera.lookAt(targetDirection.current);
     }
-  }, [targetSphericalCoords, camera]);
+  }, [sphericalCoords, camera]);
 
   // This function will be called every frame by useFrame
   const updateCamera = () => {
@@ -34,20 +38,19 @@ function zoomControls({ targetSphericalCoords, zoomActive, zoomLevel = 20, zoomS
 
 
   useFrame(() => {
-    if (zoomActive && !zoomCompleted) {
+    if (zoomActive && !onZoomComplete) {
       camera.fov = Three.MathUtils.lerp(camera.fov, zoomLevel, zoomSpeed * 0.01);
       camera.updateProjectionMatrix();
 
       if (Math.abs(camera.fov - zoomLevel) < zoomThreshold) {
-        onZoomComplete();
-        setZoomCompleted(true);
+        dispatch(setZoomCompleted(true));
       }
     }
-  });
+  },[zoomActive, onZoomComplete, dispatch]);
 
   useEffect(() => {
     if (!zoomActive) {
-      setZoomCompleted(false);
+      dispatch(setZoomCompleted(false));
     }
   }, [zoomActive]);
 

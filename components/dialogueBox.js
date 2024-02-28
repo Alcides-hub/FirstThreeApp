@@ -2,8 +2,26 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import TypeWriter from 'react-native-typewriter';
 import { useFonts, PatuaOne_400Regular } from "@expo-google-fonts/patua-one";
- 
+import {useSelector, useDispatch} from 'react-redux';
+import {setDialogueVisibility} from '../actions/dialogueActions';
+
+
 const DialogueBox = ({currentDialogue, characterName, handleOptionPress, customDialogueStyle, onDialogueComplete}) => {
+  const isDialogueVisible = useSelector((state) => state.dialogue.isDialogueVisible);
+  const dispatch = useDispatch();
+
+  const handleDialogueComplete = () => {
+    if (onDialogueComplete) {
+      onDialogueComplete();
+    }
+    dispatch(setDialogueVisibility(false));
+  };
+    if (!isDialogueVisible) {
+      return null;
+    }
+
+  
+  
   const [patuaLoaded] = useFonts({
     PatuaOne_400Regular,
   });
@@ -22,7 +40,7 @@ const DialogueBox = ({currentDialogue, characterName, handleOptionPress, customD
         <Text style={styles.nameText}>{characterName}</Text>
       </View>
     <View style={styles.dialogueBoxText}>
-      <TypeWriter typing={1} minDelay={-100} onTypingEnd={onDialogueComplete}>
+      <TypeWriter typing={1} minDelay={-100} onTypingEnd={handleDialogueComplete}>
         <Text style={styles.dialogueText}>{currentDialogue.dialogue}</Text>
       </TypeWriter>
     </View>

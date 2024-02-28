@@ -1,12 +1,31 @@
 import React from 'react';
 import { View, Image, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { setShowModalNote, setShowEggBox, setInteractedItem, setCurrentSelectedItem } from '../actions/dialogueActions';
+import { useSelector } from 'react-redux';
+import { db } from '../firebaseConfig'; // Make sure this path is correct
+import { collection, doc, setDoc } from 'firebase/firestore';
+import { pushInteractedItemToFirestore } from '../scripts/firestoreService';
 
-const Note = ({ onPress, showNote }) => {
-  if (!showNote) return null;
+
+const Note = ({ }) => {
+  const showModalNote = useSelector(state => state.dialogue.showModalNote);
+  const dispatch = useDispatch();
+  if (!showModalNote) return null;
+
+  const handleCloseNoteModal = (ItemName) => {
+    dispatch(setShowModalNote(false));
+    dispatch(setShowEggBox(true));
+    console.log(ItemName);
+    // const ItemName = "note1";
+    dispatch(setInteractedItem(ItemName));
+    dispatch(setCurrentSelectedItem(ItemName));
+    pushInteractedItemToFirestore(ItemName);
+  }
 
   return (
     <View style={styles.noteContainer}>
-      <TouchableOpacity style={styles.touchableContainer} onPress={() => onPress('Note')}>
+      <TouchableOpacity style={styles.touchableContainer} onPress={() => handleCloseNoteModal("note1")} >
         <Image
           source={require("../assets/paper_chaper_1.png")}
           style={styles.noteImage}
