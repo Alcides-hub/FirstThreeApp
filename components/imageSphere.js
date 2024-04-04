@@ -6,7 +6,6 @@ import { TextureLoader } from 'three';
 
 
 
-
 function ImageSphere() {
     const mesh = useRef();
     const texture = useLoader(Three.TextureLoader, require('../assets/TokkaidoRoom1.jpg'));

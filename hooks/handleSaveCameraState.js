@@ -2,6 +2,7 @@ import { useDispatch } from 'react-redux';
 import { saveCameraState } from '../actions/dialogueActions';
 import { useThree } from '@react-three/fiber';
 
+
 export const useSaveCameraState = () => {
   const dispatch = useDispatch();
   const { camera } = useThree();

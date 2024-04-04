@@ -3,19 +3,26 @@ import { useThree, useFrame } from '@react-three/fiber/native';
 import * as Three from 'three';
 import { Gyroscope } from 'expo-sensors';
 import useGyroscope from './useGyroscope';
+import { incrementRotationAngle } from '../actions/dialogueActions';
+import { useDispatch, useSelector } from 'react-redux';
 
 
 
 
-function CameraControls({rotation, controlMode, isDialogueActive, showModalNote}) {
+function CameraControls() {
     const { camera } = useThree();
     const gyroscopeData = useRef({ x: 0, y: 0, z: 0 });
     const manualRotation = useRef({ x: 0, y: 0 });
     const initialOrientationSet = useRef(false);
     const initialOrientation = useRef(new Three.Quaternion());
-  
-     
-    
+    const dispatch = useDispatch();
+
+    //use the rotation angle from Redux
+    const rotationAngle = useSelector(state => state.dialogue.rotationAngle); 
+    console.log("rotates:", rotationAngle);
+    //use control mode from Redux.
+    const controlMode = useSelector(state => state.dialogue.controlMode); 
+    console.log("Current control mode:", controlMode);
     // Set the initial orientation once
     useEffect(() => {
       // Adjust the second parameter (Y axis rotation) to fine-tune the initial direction the camera faces
@@ -29,15 +36,19 @@ function CameraControls({rotation, controlMode, isDialogueActive, showModalNote}
       initialOrientationSet.current = true;
     }, [camera]);
   
-    // Initialize the gyroscope sensor
+    // Initialize and use the gyroscope sensor
     useGyroscope((data) => {
-      if (initialOrientationSet.current) {
-        gyroscopeData.current = {
-          x: lowPassFilter(data.x, gyroscopeData.current.x, 0.05),
-          y: lowPassFilter(data.y, gyroscopeData.current.y, 0.05),
-          z: lowPassFilter(data.z, gyroscopeData.current.z, 0.05),
-        };
-      }
+      if (!initialOrientationSet.current) return;
+      const newData = {
+        x: lowPassFilter(data.x, gyroscopeData.current.x, 0.05),
+        y: lowPassFilter(data.y, gyroscopeData.current.y, 0.05),
+        z: lowPassFilter(data.z, gyroscopeData.current.z, 0.05),
+      };
+      gyroscopeData.current = newData;
+
+      // Assuming you want to use the y-axis rotation for the example
+      const angleDelta = newData.y * 0.1; // This is an example calculation
+      dispatch(incrementRotationAngle(angleDelta)); // Dispatch action to update rotation angle in Redux
     });
   
     // The lowPassFilter function itself
@@ -82,13 +93,10 @@ function CameraControls({rotation, controlMode, isDialogueActive, showModalNote}
     camera.rotation.x %= 2 * Math.PI;
     camera.rotation.y %= 2 * Math.PI;
   } else if ( controlMode === 'buttons') {
-    const rotationInRadians = rotation * (Math.PI / 180 );
+    const rotationInRadians = rotationAngle * (Math.PI / 180 );
       camera.rotation.y = rotationInRadians;
   } 
   });
-  
-  
-    return null;
   }
 
   export default CameraControls;

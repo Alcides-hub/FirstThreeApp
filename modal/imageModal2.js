@@ -27,9 +27,6 @@ return (
         style={styles.imageStyle}
         
       />
-       <TouchableOpacity onPress={onClose}>
-      <Text style={{ color: 'grey'}}>X</Text>
-    </TouchableOpacity>
       </ReactNativeZoomableView>
         </View>
 </Modal>
@@ -39,16 +36,14 @@ return (
 
 const styles = StyleSheet.create({
     modalContentContainer: {
-       
-        height: 340,
-        width: 740,
-    
+        height: 380,
+        width: 400,
         alignSelf: 'center', // Aligns the container in the center of the modal
         justifyContent: 'center', // Centers the content vertically within the container
       },
       imageStyle: {
-        width: '70%',
-        height: '60%',
+        width: 240,
+        height: 240,
         resizeMode: 'contain',
         marginLeft: 70,
       },

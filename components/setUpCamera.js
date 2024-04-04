@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import { useThree } from '@react-three/fiber/native';
 
+
+
 const SetupCamera = ({ }) => {
   const { camera } = useThree();
   

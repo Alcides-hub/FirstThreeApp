@@ -1,16 +1,18 @@
 import React, {useRef, useState, useEffect} from 'react';
-import eggBox from '../image/eggBox.jpg';
-import Note1 from '../assets/paper_chaper_1.png';
 import { Box, FlatList, Image, Pressable } from 'native-base';
-import { Dimensions } from 'react-native';
+import {View, Dimensions, TouchableOpacity, Text } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
-import { setShowEggBoxModal, setShowModalImage, setShowObject, toggleSideDrawer, setCurrentSelectedItem, setInteractedItem, addUsedItem } from '../actions/dialogueActions';
+import { showModalImage ,hideModalImage, toggleSideDrawer, setCurrentSelectedItem, setInteractedItem, addUsedItem } from '../actions/dialogueActions';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig'; // Import your Firestore instance
+import ImageModal2 from '../modal/imageModal2'; 
 
 
+const eggBox = require('../image/eggBox.jpg');
+const Note1 = require('../image/paper_chaper_1.png');
 
-const SideDrawerOption = () => {
+
+const SideDrawerOption = (onLook, onUseItem) => {
     const [currentIndex, setCurrentIndex] = React.useState(0);
     const flatListRef = useRef(null);
     const drawerBackgroundImage = require('../assets/mainBoard.png'); // Adjust the path
@@ -19,57 +21,54 @@ const SideDrawerOption = () => {
     const window = Dimensions.get('window');
     const [items, setItems] = useState([]);
     const isDrawerOpen = useSelector((state)=> state.dialogue.isDrawerOpen);
+    const showModal = useSelector((state) => state.dialogue.showModalImage);
     const imageMap = {
-      EggBox: eggBox,
-      Note1: Note1,
+      Eggbox: eggBox,
+      note1: Note1,
     };
+    const interactedItems = useSelector((state) => state.dialogue.interactedItems);
+   
      // Define size for the arrows based on screen size
      
     
   
-    
-    useEffect(() => {
-      if (isDrawerOpen) {
-        const fetchItems = async () => {
-          const querySnapshot = await getDocs(collection(db, 'objects')); // Assuming 'objects' is your collection name
-          const fetchedItems = querySnapshot.docs.map(doc => {
-            const data = doc.data();
-            // Directly use the 'image' field from Firestore document as the image path
-            const image = imageMap[data.name];
-            return {
-              id: doc.id,
-              name: data.name,
-              image: image, // Directly using the path to the image from Firestore
-            };
+     useEffect(() => {
+      const fetchItems = async () => {
+        
+          if (!isDrawerOpen) return;
+
+          const querySnapshot = await getDocs(collection(db, "objects"));
+          const allItems = querySnapshot.docs.map(doc => {
+              const data = doc.data();
+              // Assuming you have a mechanism to resolve images based on data.name
+              return {
+                  id: doc.id,
+                  name: data.name,
+                  image: imageMap[data.name], // Ensure imageMap is defined
+              };
           });
-    
-          setItems(fetchedItems);
+
+          // Create a Map to filter items by name, preserving the first occurrence
+          let itemsByName = new Map();
+          allItems.forEach(item => {
+            if (!itemsByName.has(item.name)) {
+              itemsByName.set(item.name, item);
+            }
+          });
+
+          // Convert the Map back to an array
+          const uniqueItems = Array.from(itemsByName.values());
+
+          setItems(uniqueItems);
         };
-    
+      
         fetchItems();
-      }
-    }, [isDrawerOpen]);    
+      }, [isDrawerOpen, interactedItems]);
 
     if (!isDrawerOpen) {
+
+      
       return null;
-    }
-
-
-
-
-    const onLook = (itemName) => {
-      console.log(`Looking at ${itemName}`);
-      if (itemName === 'EggBox') {
-        dispatch(setShowEggBoxModal(true));
-      } else if (itemName === 'note1') {
-        dispatch(setShowModalImage(true));
-      } 
-    };
-
-    const onUseItem = (itemName) => {
-      console.log(`Using ${itemName}`);
-      dispatch(setShowObject(true));
-      dispatch(addUsedItem(itemName));
     }
 
 
@@ -108,8 +107,16 @@ const scrollUp = () => {
 }
 
 const handlePressItem = (item) => {
-setChosenItem(item);
+  if (item.name === 'note1') {
+    dispatch(showModalImage());
+    setChosenItem(item);
+  }
+  else {
+    setChosenItem(item);
+  }
 }
+
+
 const arrowSize = {
   width: window.width * 0.1,
   height: window.height * 0.1,
@@ -121,21 +128,13 @@ const arrowSize = {
       if (!isVisible) return null;
     
       return (
-        <Box width={100} height={10} justifyContent="center" alignItems="center">
-          <Pressable onPress={() => handlePressItem(item)}>
-            <Image
-              source={item.image}
-              alt={item.name}
-              height="30px"
-              width="30px"
-            />
-          </Pressable>
-        </Box>
+        <View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 15 }}>
+        <Pressable onPress={() => handlePressItem(item)}>
+          <Image source={item.image} alt={item.name} style={{ height: 50, width: 50 }} />
+        </Pressable>
+      </View>
     ); 
   };
-
-  
-    
     return (
       <Box style={{
         position: 'absolute', // Change to 'absolute' to overlay on top of other content
@@ -145,7 +144,7 @@ const arrowSize = {
         bottom: 0,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.7)', // Semi-transparent background
+        backgroundColor: 'rgba(0, 0, 0, 0)', // Semi-transparent background
       }}>
         <Pressable style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 50,  }} 
         onPress={() => dispatch(toggleSideDrawer())}>
@@ -158,8 +157,8 @@ const arrowSize = {
         </Pressable>
         <Box style={{
         position: 'absolute',
-        top: '14%', // Adjust these percentages as needed
-        left: '23%', // Adjust these percentages as needed
+        top: '12%', // Adjust these percentages as needed
+        left: '30%', // Adjust these percentages as needed
         width: arrowSize.width ,
         height: arrowSize.height,
         justifyContent: 'center',
@@ -187,13 +186,13 @@ const arrowSize = {
           keyExtractor={(item) => item.id.toString()}
           horizontal={false}
           showsHorizontalScrollIndicator={false}
-          style={{ position: 'absolute', left: arrowSize.width * 2.3, top: window.height * 0.26, height: window.height * 1 }}
+          style={{ position: 'absolute', left: arrowSize.width * 2.65, top: window.height * 0.1, height: window.height * 1 }}
           contentContainerStyle={{ alignItems: 'center' }}
         />
         <Box style={{
         position: 'absolute',
         bottom: '12%', // Adjust these percentages as needed
-        left: '23%', // Adjust these percentages as needed
+        left: '30%', // Adjust these percentages as needed
         width: arrowSize.width,
         height: arrowSize.height,
         justifyContent: 'center',
@@ -214,24 +213,30 @@ const arrowSize = {
         </Pressable>
         </Box>
         {chosenItem && (
-          <Image
-             source={chosenItem.image} // Corrected to use chosenItem.name
-            alt="Selected Item"
-            style={{
-              position: 'absolute',
-              width: window.width * 0.6,
-              height: window.height * 0.55,
-              top: '53%',
-              left: '55%',
-              transform: [
-                  { translateX: -(window.width * 0.3) },
-                  { translateY: -(window.height * 0.3) },
-              ],
-            }}
-            resizeMode="contain"
-          />
+  <Pressable
+    style={{
+      position: 'absolute',
+      width: window.width * 0.45,
+      height: window.height * 0.45,
+      top: '58%',
+      left: '62%',
+      transform: [
+        { translateX: -(window.width * 0.22) },
+        { translateY: -(window.height * 0.3) },
+      ],
+    }}
+    onPress={() => setChosenItem(null)} // This will hide the image when pressed
+  >
+    <Image
+      source={chosenItem.image}
+      style={{ width: '100%', height: '100%' }}
+      resizeMode="contain"
+      alt={chosenItem.name}
+    />
+     <ImageModal2 isVisible={showModal} onClose={() => dispatch(hideModalImage())} />
+  </Pressable>
         )}
-      </Box>
+      </Box>      
     );
           };
 

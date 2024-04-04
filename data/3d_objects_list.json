@@ -1,12 +1,12 @@
 [
     {
       "id": 1,
-      "name": "EggBox",
+      "name": "eggBox",
       "image": "../image/eggBox.jpg"
     },
     {
       "id": 2,
-      "name": "note1",
+      "name": "Note1",
       "image": "../image/paper_chaper_1.png"
     }
   ]

@@ -1,5 +1,6 @@
+// Assuming db is correctly initialized
 import { db } from '../firebaseConfig';
-import { collection, doc, setDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, addDoc } from 'firebase/firestore';
 
 export const pushInteractedItemToFirestore = async (itemName) => {
   try {
@@ -14,3 +15,13 @@ export const pushInteractedItemToFirestore = async (itemName) => {
     console.error(`Error pushing interacted item to Firestore: ${error}`);
   }
 };
+
+export const addItemToFirestore = async (item) => {
+  try {
+    const docRef = await addDoc(collection(db, "objects"), item);
+    console.log("Document written with ID: ", docRef.id);
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+};
+
