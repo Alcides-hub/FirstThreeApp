@@ -22,13 +22,16 @@ const SET_INTERACTED_ITEM = 'SET_INTERACTED_ITEM';
 const SET_CURRENT_SELECTED_ITEM = 'SET_CURRENT_SELECTED_ITEM';
 const ADD_ITEM_USED = 'ADD_ITEM_USED';
 const TOGGLE_SIDE_DRAWER = 'TOGGLE_SIDE_DRAWER';
-const SET_ZOOM_PARAMS = 'SET_ZOOM_PARAMS';
+const SET_SPHERICAL_COORDS = 'SET_SPHERICAL_COORDS';
+const SET_ZOOM_TARGET = 'SET_ZOOM_TARGET';
 const SET_ZOOM_ACTIVE = 'SET_ZOOM_ACTIVE';
+const SET_ZOOM_LEVEL = 'SET_ZOOM_LEVEL';
 const SET_ZOOM_COMPLETE = "SET_ZOOM_COMPLETE";
 const SET_IMAGE_OPEN = "SET_IMAGE_OPEN";
 const SAVE_CAMERA_STATE = "SAVE_CAMERA_STATE";
 const RESTORE_CAMERA_STATE = "RESTORE_CAMERA_STATE";
 const SET_SHOW_OBJECT = "SET_SHOW_OBJECT";
+const ENABLE_ZOOM = "ENABLE_ZOOM";
 
 
 // Action Creators
@@ -89,37 +92,47 @@ export const handleEndDialogue = () => ({
   // You may or may not have a payload or other properties
 });
 
-export const setZoomParams = (sphericalCoords, zoomLevel) => ({
-  type: SET_ZOOM_PARAMS,
-  payload: { sphericalCoords, zoomLevel },
+export const setSphericalCoods = (sphericalCoords) => ({
+  type: SET_SPHERICAL_COORDS,
+  payload: { sphericalCoords },
 });
+
+export const setZoomTarget = (targetPosition) => ({
+  type: SET_ZOOM_TARGET,
+  payload: targetPosition,
+})
 
 export const setZoomActive = (zoomActive) => ({
   type: SET_ZOOM_ACTIVE,
   payload: zoomActive,
 });
 
+export const setZoomLevel = (zoomLevel) => ({
+  type: SET_ZOOM_LEVEL,
+  payload: zoomLevel,
+})
+ 
 export const setIsImageOpen = (isOpen) => ({
   type: SET_IMAGE_OPEN,
   payload: isOpen,
 });
 
-export const setZoomCompleted = (isCompleted) => ({
+export const setZoomCompleted = (isZoomCompleted) => ({
   type: SET_ZOOM_COMPLETE,
-  payload: isCompleted,
+  payload: isZoomCompleted,
 });
 
 
 // Redux Action Creator for setting an interacted item
-export const setInteractedItem = (ItemName) => ({
+export const setInteractedItem = (itemName) => ({
   type: SET_INTERACTED_ITEM,
-  payload: ItemName,
+  payload: itemName,
 });
 
 
-export const setCurrentSelectedItem = (ItemName) => ({
+export const setCurrentSelectedItem = (itemName) => ({
   type: SET_CURRENT_SELECTED_ITEM,
-  payload: ItemName,
+  payload: itemName,
 });
 
 export const addUsedItem = (itemName) => ({
@@ -127,29 +140,70 @@ export const addUsedItem = (itemName) => ({
   payload: itemName, // Corrected from Itemname to itemName for consistency
 });
 
+
 // Action to toggle SideDrawer visibility
 export const toggleSideDrawer = () => ({
   type: TOGGLE_SIDE_DRAWER,
 });
 
 export const saveCameraState = (cameraState) => ({
-  type: SAVE_CAMERA_STATE,
+  type: 'SAVE_CAMERA_STATE',
   payload: cameraState,
+});
+// Action to request a camera reset
+export const requestCameraReset = () => ({
+  type: 'REQUEST_CAMERA_RESET',
+});
+
+// Action to clear the request after the camera has been reset
+export const clearCameraResetRequest = () => ({
+  type: 'CLEAR_CAMERA_RESET_REQUEST',
+});
+
+export const enableZoom = (isEnabled) => ({
+  type: ENABLE_ZOOM,
+  payload: isEnabled,
 })
+
 
 export const restoreCameraState = () => ({
   type: RESTORE_CAMERA_STATE,
 })
 
-export const setShowModalImage = (isVisible) => ({
-  type: SET_SHOW_MODAL_IMAGE,
-  payload: isVisible,
-})
+export const showModalImage = () => ({
+  type: 'SHOW_MODAL_IMAGE',
+});
+
+export const hideModalImage = () => ({
+  type: 'HIDE_MODAL_IMAGE',
+});
 
 export const setShowObject = (isVisible) => ({
   type: SET_SHOW_OBJECT,
   payload: isVisible,
 })
+
+// Action Types
+const INCREMENT_ROTATION_ANGLE = 'INCREMENT_ROTATION_ANGLE';
+
+// Action Creator
+export const incrementRotationAngle = (angle) => ({
+  type: INCREMENT_ROTATION_ANGLE,
+  payload: angle,
+});
+
+const MANUAL_ROTATE = 'MANUAL_ROTATE';
+export const manualRotate = (angle) => ({
+  type: MANUAL_ROTATE,
+  payload: angle,
+});
+
+const TOGGLE_CONTROL_MODE = 'TOGGLE_CONTROL_MODE';
+
+export const toggleControlMode = () => ({
+  type: TOGGLE_CONTROL_MODE,
+});
+
 
 
 

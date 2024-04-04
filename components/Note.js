@@ -6,22 +6,30 @@ import { useSelector } from 'react-redux';
 import { db } from '../firebaseConfig'; // Make sure this path is correct
 import { collection, doc, setDoc } from 'firebase/firestore';
 import { pushInteractedItemToFirestore } from '../scripts/firestoreService';
+import { normalizeItemName } from '../utils/utils';
 
-
-const Note = ({ }) => {
+const Note = () => {
   const showModalNote = useSelector(state => state.dialogue.showModalNote);
   const dispatch = useDispatch();
+  
+
   if (!showModalNote) return null;
 
-  const handleCloseNoteModal = (ItemName) => {
+
+  const handleCloseNoteModal = async (itemName) => {
+    // Normalize the item name when modal is closed and item is interacted with
+    const normalizedItem = normalizeItemName({ name: itemName, image: 3 }); // Assuming 'image: 3' is correct for all items, adjust as necessary
+
+    // Close the modal
     dispatch(setShowModalNote(false));
+    // Optionally show the egg box or handle other UI logic
     dispatch(setShowEggBox(true));
-    console.log(ItemName);
-    // const ItemName = "note1";
-    dispatch(setInteractedItem(ItemName));
-    dispatch(setCurrentSelectedItem(ItemName));
-    pushInteractedItemToFirestore(ItemName);
-  }
+    // Mark the item as interacted in the Redux state with the normalized item name
+    dispatch(setInteractedItem(normalizedItem.name)); // Dispatch with normalized name
+    // Update Firestore to mark the item as interacted, using the full normalized item
+    await pushInteractedItemToFirestore(normalizedItem.name);
+  };
+  
 
   return (
     <View style={styles.noteContainer}>

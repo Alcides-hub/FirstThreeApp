@@ -7,18 +7,23 @@ const initialState = {
     showModalNote: false,
     showEggBox: false,
     sphericalCoords: null,
-    zoomLevel: 15,
+    zoomTarget: null,
+    zoomLevel: 0,
     zoomActive: false,
     isZoomCompleted: false,
     isImageOpen: false,
+    enableZoom: false,
     interactedItems: [],
     currentSelectedItem: null,
     usedItems: [],
     isDrawerOpen: false,
     cameraState: null,
+    requestCameraReset: false,
     showEggBoxModal: false,
     showModalImage: false,
     showObject: false,
+    rotationAngle: 0,
+    controlMode: 'buttons',
   };
 
 const dialogueReducer = (state = initialState, action) => {
@@ -78,42 +83,38 @@ const dialogueReducer = (state = initialState, action) => {
                 ...state,
                 showEggBoxModal: action.payload,
                 };
-            case 'SET_SHOW_MODAL_IMAGE':
-                return {
-                ...state,
-                showModalImage: action.payload,
-                }
+            case 'SHOW_MODAL_IMAGE':
+                    return { ...state, showModalImage: true };
+            case 'HIDE_MODAL_IMAGE':
+                    return { ...state, showModalImage: false };
             case 'SET_SHOW_OBJECT':
                 return {
                 ...state,
                 showObject: action.payload,
                 }
+            case 'SET_ZOOM_TARGET':
+                    return { ...state, zoomTarget: action.payload};
             case 'SET_ZOOM_ACTIVE':
-                return {
-                    ...state,
-                    zoomActive: action.payload,
-                };
-                case 'SET_ZOOM_PARAMS':
-                    return {
-                      ...state,
-                      sphericalCoords: action.payload.sphericalCoords, // Update with the plain object
-                      zoomLevel: action.payload.zoomLevel, // Update zoom level
-                    };
+                    return { ...state, zoomActive: action.payload }; 
+            case 'SET_ZOOM_LEVEL':
+                    return { ...state, zoomLevel: action.payload };
+            case 'SET_SPHERICAL_COORDS':
+                    return { ...state, sphericalCoords: action.payload.sphericalCoords };
             case 'SET_IMAGE_OPEN':
-                return {
-                    ...state,
-                    isImageOpen: action.payload,
-                };                
+                    return { ...state, isImageOpen: action.payload };
             case 'SET_ZOOM_COMPLETE':
             return {
                 ...state,
-            isImageOpen: true,
-            onZoomComplete: action.payload,
+            // isImageOpen: ,
+            isZoomCompleted: action.payload,
             };
+            case 'ENABLE_ZOOM':
+                return {...state, enableZoom: action.payload};
             case 'SET_INTERACTED_ITEM':
+                console.log('Interacted item:', action.payload); // Log to verify
                 return {
                     ...state,
-                    interactedItems: state.interactedItems.includes(action.payload) ? state.interactedItems : [...state.interactedItems, action.payload],
+                    interactedItems: [...state.interactedItems, action.payload],
                 };
             case 'SET_CURRENT_SELECTED_ITEM':
             return {
@@ -133,12 +134,40 @@ const dialogueReducer = (state = initialState, action) => {
             ...state, 
             isDrawerOpen: !state.isDrawerOpen };
             case 'SAVE_CAMERA_STATE':
+                console.log("Reducer saving camera state:", action.payload);
             return {
                 ...state,
-                cameraState: action.payload,
+                cameraState: {
+                    position: action.payload.position,
+                    quaternion: action.payload.quaternion,
+                    fov: action.payload.fov,
+                },  
             };
-            case 'RESTORE_CAMERA_STATE':
-            return state;
+            case 'FETCH_DIALOGUE_START':
+            return {
+                ...state,
+                loading: true,
+                error: null, // Clear previous errors on new fetch
+            };
+            case 'REQUEST_CAMERA_RESET':
+            console.log("reset");
+            return { ...state, requestCameraReset: true };
+            
+            case 'CLEAR_CAMERA_RESET_REQUEST':
+            return { ...state, requestCameraReset: false };
+            
+        // Include all your other cases here
+        case 'INCREMENT-ROTATION-ANGLE':
+        case 'MANUAL_ROTATE':
+            return {
+                ...state,
+                rotationAngle: state.rotationAngle + action.payload,
+            };
+            case 'TOGGLE_CONTROL_MODE':
+                return {
+                  ...state,
+                  controlMode: state.controlMode === 'buttons' ? 'gyroscope' : 'buttons',
+                };
             default:
             return state;
     }

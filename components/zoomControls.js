@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import { useThree, useFrame } from '@react-three/fiber/native';
 import * as Three from 'three';
 import { useDispatch, useSelector} from 'react-redux';
-import { setIsImageOpen, setZoomParams, setZoomCompleted, setZoomActive } from '../actions/dialogueActions';
+import { setIsImageOpen, setSphereCoords, setZoomCompleted, setZoomActive } from '../actions/dialogueActions';
 
 
 function zoomControls({ zoomSpeed = 5}) {
@@ -17,8 +17,8 @@ function zoomControls({ zoomSpeed = 5}) {
     vector.setFromSpherical(spherical);
     return vector;
   };
-  const { zoomActive, zoomLevel, isImageOpen, onZoomComplete, sphericalCoords} = useSelector((state) => state.dialogue)
-  
+  const { zoomActive, zoomLevel, isZoomCompleted, sphericalCoords} = useSelector((state) => state.dialogue)
+  const { zoomTarget } = useSelector((state) => state.dialogue);
   // Set the target direction when targetSphericalCoords change
   useEffect(() => {
     if (sphericalCoords) {
@@ -38,15 +38,18 @@ function zoomControls({ zoomSpeed = 5}) {
 
 
   useFrame(() => {
-    if (zoomActive && !onZoomComplete) {
+    if (zoomActive && !isZoomCompleted && zoomTarget) {
       camera.fov = Three.MathUtils.lerp(camera.fov, zoomLevel, zoomSpeed * 0.01);
       camera.updateProjectionMatrix();
+      const targetVec = new Three.Vector3(...zoomTarget);
+      camera.lookAt(targetVec);
+      console.log(zoomTarget,"hello");
 
       if (Math.abs(camera.fov - zoomLevel) < zoomThreshold) {
         dispatch(setZoomCompleted(true));
       }
     }
-  },[zoomActive, onZoomComplete, dispatch]);
+  },[ zoomLevel ,zoomTarget ,zoomActive, isZoomCompleted, dispatch]);
 
   useEffect(() => {
     if (!zoomActive) {

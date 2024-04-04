@@ -9,6 +9,8 @@ import SetupCamera from './components/setUpCamera';
 // import { db } from './firebaseConfig'; 
 import { initializeApp } from "firebase/app";3
 import * as Font from 'expo-font';
+import CameraControls from './components/cameraControls';
+import TouchControls from './components/buttonControls';
 // import DialogueBox from './components/dialogueBox';
 // import { doc, getDoc } from "firebase/firestore/lite";
 import { Asset } from 'expo-asset';
@@ -20,8 +22,12 @@ import Note from './components/Note';
 import EggBox from './components/eggBox';
 import Hotspot from './components/hotspot';
 import ZoomControls from './components/zoomControls';
-// import AdminSetupComponent from './components/AdminSetupComponent';
+import SideDrawerMode from './components/SideDrawerMode';
 import SideDrawerOption from './components/sideDrawer';
+import ModeToggleControl from './components/ModeToggleControl';
+import DrawerToggleButton from './components/DrawerToggleButton';
+import BackButton from './components/BackButton';
+import CameraStateUpdater from './components/cameraStateUpdater';
 
 
   
@@ -45,17 +51,23 @@ import SideDrawerOption from './components/sideDrawer';
             <SetupCamera  />
             <ambientLight />
             <pointLight position={[1, 15, 15]} />
+            <CameraControls />
             <Suspense fallback={null}>
             <ImageSphere />
             <EggBox/>
             <Hotspot/>
             </Suspense>
             <ZoomControls />
+            <CameraStateUpdater />
           </Canvas>
+          <BackButton />
+          <DrawerToggleButton/>
+          <ModeToggleControl />
           <DialogueFetcher/>
           <Note />
+          <SideDrawerMode />
           <SideDrawerOption />
-          {/* <AdminSetupComponent /> */}
+          <TouchControls />
       </View>
     </NativeBaseProvider>
     </Provider>

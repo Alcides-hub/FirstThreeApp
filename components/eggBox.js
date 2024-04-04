@@ -89,7 +89,7 @@ import { useThree } from '@react-three/fiber/native';
 import * as Three from 'three';
 import { Asset } from 'expo-asset';
 import {useDispatch, useSelector} from 'react-redux';
-import {setInteractedItem, setCurrentSelectedItem, toggleSideDrawer} from '../actions/dialogueActions';
+import {setInteractedItem, setCurrentSelectedItem, toggleSideDrawer, setShowEggBox} from '../actions/dialogueActions';
 import { pushInteractedItemToFirestore } from '../scripts/firestoreService';
 
 
@@ -101,12 +101,14 @@ function EggBox() {
     const { invalidate } = useThree();
     // const usedItems = useSelector(state => state.appState.usedItems);
 
-    const handleItemInteraction = (ItemName) => {
-        console.log(ItemName); // Logging the interacted item's name for verification
-        dispatch(setInteractedItem(ItemName));
-        dispatch(setCurrentSelectedItem(ItemName));
-        pushInteractedItemToFirestore(ItemName);
+    const handleItemInteraction = (itemName) => {
+        console.log(itemName); // Logging the interacted item's name for verification
+        dispatch(setInteractedItem(itemName));
+        // dispatch(setCurrentSelectedItem(itemName));
+        pushInteractedItemToFirestore(itemName);
         dispatch(toggleSideDrawer());
+        dispatch(setShowEggBox(false));
+        
       };
 
      
