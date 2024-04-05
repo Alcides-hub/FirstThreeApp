@@ -9,6 +9,7 @@ export const setDialogueVisibility = (isVisible) => {
 }
 
 // Action Types
+const IS_DIALOGUE_ACTIVE = 'IS_DIALOGUE_ACTIVE';
 const FETCH_DIALOGUE_START = 'FETCH_DIALOGUE_START';
 const FETCH_DIALOGUE_SUCCESS = 'FETCH_DIALOGUE_SUCCESS';
 const FETCH_DIALOGUE_FAILURE = 'FETCH_DIALOGUE_FAILURE';
@@ -32,16 +33,19 @@ const SAVE_CAMERA_STATE = "SAVE_CAMERA_STATE";
 const RESTORE_CAMERA_STATE = "RESTORE_CAMERA_STATE";
 const SET_SHOW_OBJECT = "SET_SHOW_OBJECT";
 const ENABLE_ZOOM = "ENABLE_ZOOM";
-
+const SET_SELECTED_UMBRELLAS = "SET_SELECTED_UMBRELLAS";
+const SET_IS_CORRECT_ORDER = "SET_IS_CORRECT_ORDER";
+const SET_DIALOGUE_DATA = 'SET_DIALOGUE_DATA';
+const SET_INCORRECT_ATTEMPTS = 'SET_INCORRECT_ATTEMPTS'
 
 // Action Creators
 export const fetchDialogueStart = () => ({
   type: FETCH_DIALOGUE_START,
 });
 
-export const fetchDialogueSuccess = (dialogueData) => ({
+export const fetchDialogueSuccess = (data) => ({
   type: FETCH_DIALOGUE_SUCCESS,
-  payload: dialogueData,
+  payload: data,
 });
 
 export const fetchDialogueFailure = (error) => ({
@@ -52,6 +56,31 @@ export const fetchDialogueFailure = (error) => ({
 export const setCurrentDialogueIndex = (index) => ({
   type: SET_CURRENT_DIALOGUE_INDEX,
   payload: index,
+})
+
+export const setSelectedUmbrellas = (umbrellas) => ({
+  type: SET_SELECTED_UMBRELLAS,
+  payload: umbrellas,
+})
+
+export const isDialogueActive = (isActive) => ({
+  type: IS_DIALOGUE_ACTIVE,
+  payload: isActive,
+})
+
+export const setisCorrectOrder = (isCorrectOrder) => ({
+  type: SET_IS_CORRECT_ORDER,
+  payload: isCorrectOrder,
+})
+
+export const setIncorrectAttempts = (incorrectAttempts) => ({
+  type: SET_INCORRECT_ATTEMPTS,
+  payload: incorrectAttempts,
+})
+
+export const setDialogueData = (data) => ({
+  type: 'SET_DIALOGUE_DATA',
+  payload: data,
 })
 
 export const setShowModalNote = (isVisible) => ({
@@ -69,21 +98,29 @@ export const setShowEggBoxModal = (isVisible) => ({
   payload: isVisible,
 })
 
-// Thunk Action Creator
-export const fetchDialogue = (dialogueId) => async (dispatch) => {
-  dispatch(fetchDialogueStart());
+// Make sure the fetchDialogue action looks similar to this
+export const fetchDialogue = (collection, documentId) => async (dispatch) => {
+  dispatch({ type: 'FETCH_DIALOGUE_START' });
   try {
-    const docRef = doc(db, "kasa_dialogue", "kasa_start");
+    const docRef = doc(db, collection, documentId);
     const docSnap = await getDoc(docRef);
-    console.log("Fetching dialogue start");
     if (docSnap.exists()) {
-      // console.log("Fetched dialogue data:", docSnap.data());
-      dispatch(fetchDialogueSuccess(docSnap.data()));
+      dispatch({
+        type: 'FETCH_DIALOGUE_SUCCESS',
+        payload: {
+          collection,
+          documentId,
+          data: docSnap.data(),
+        },
+      });
     } else {
-      console.log("No such dialogue exists");
-      throw new Error('No such dialogue exists!');}
+      throw new Error('Document does not exist');
+    }
   } catch (error) {
-    dispatch(fetchDialogueFailure(error.message));
+    dispatch({
+      type: 'FETCH_DIALOGUE_FAILURE',
+      error: error.message,
+    });
   }
 };
 
@@ -112,9 +149,9 @@ export const setZoomLevel = (zoomLevel) => ({
   payload: zoomLevel,
 })
  
-export const setIsImageOpen = (isOpen) => ({
+export const setImageOpen = (isImageOpen) => ({
   type: SET_IMAGE_OPEN,
-  payload: isOpen,
+  payload: isImageOpen,
 });
 
 export const setZoomCompleted = (isZoomCompleted) => ({

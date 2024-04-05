@@ -1,17 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
+// import { Canvas } from '@react-three/fiber';
 import { useThree, useFrame} from '@react-three/fiber/native';
 import * as Three from 'three';
 import { Asset } from 'expo-asset';
 import {useDispatch, useSelector} from 'react-redux';
-import {setInteractedItem, setCurrentSelectedItem , setZoomActive, setZoomTarget, setZoomLevel, setZoomCompleted} from '../actions/dialogueActions';
+import {setInteractedItem, setCurrentSelectedItem , setZoomActive, setZoomTarget, setZoomLevel, setZoomCompleted, setImageOpen} from '../actions/dialogueActions';
 import { Dimensions } from 'react-native';
 import { useSaveCameraState} from '../hooks/handleSaveCameraState';
+// import ImageModal from '../modal/imageModal';
+// import {View} from 'react-native';
 
 
 
 
 function Hotspot() {
-  const {isDialogueVisible, showModalNote } = useSelector((state) => state.dialogue);
+  const {isDialogueVisible, showModalNote, isImageOpen } = useSelector((state) => state.dialogue);
+  // const isZoomCompleted = useSelector((state) => state.dialogue.isZoomCompleted);
   const { camera, invalidate} = useThree();
   const windowDimensions = Dimensions.get('window');
   const dispatch = useDispatch();
@@ -31,7 +35,7 @@ function Hotspot() {
     
  // Load texture once, regardless of conditions
  useEffect(() => {
-  console.log("Hotspot Icon on!")
+  // console.log("Hotspot Icon on!")
     async function loadTexture() {
         try {
             const asset = Asset.fromModule(require('../assets/icon-sign/infosign2.png'));
@@ -47,6 +51,17 @@ function Hotspot() {
 
     loadTexture();
 }, [invalidate]);
+
+
+// useEffect(() => {
+//   if (isZoomCompleted) {
+//     // console.log(isZoomCompleted, "zoom on");
+//     dispatch(setImageOpen(true));
+//     // Optionally reset the zoom completion flag for future actions
+//     // dispatch(setZoomCompleted(false));
+//   }
+// }, [isZoomCompleted, dispatch]);
+
 
 useFrame(() => {
   if (mesh.current) {
@@ -67,7 +82,7 @@ useFrame(() => {
     // Assuming the hotspot is the same size as the window/screen:
     const touchX = (event.nativeEvent.locationX / windowDimensions.width) * 2 - 1;
     const touchY = -(event.nativeEvent.locationY / windowDimensions.height) * 2 + 1;
-    console.log("Touch event received at:", touchX, touchY);
+    // console.log("Touch event received at:", touchX, touchY);
     saveCameraState();
     // Create a vector for the raycaster
     const pointerVector = new Three.Vector2(touchX, touchY);
@@ -85,14 +100,15 @@ useFrame(() => {
   const handleTouchEnd = (point) => {
     dispatch(setZoomCompleted(false)); 
     if (!point) return; // Early return if point is not defined
-  console.log("TouchEnd event triggered", point);
+  // console.log("TouchEnd event triggered", point);
     const ItemName = "Hotspot"; // Or dynamically determine based on the object interacted with
     const serializablePoint = { x: point.x, y: point.y, z: point.z };
     dispatch(setInteractedItem({ ItemName, point: serializablePoint }));
     dispatch(setZoomTarget([point.x, point.y, point.z]));
     dispatch(setZoomActive(true));
     dispatch(setZoomLevel(15));
-    // setIsImageOpen(true);
+    // console.log('Dispatching setImageOpen(true)');
+    // dispatch(setImageOpen(true));
    
   };
   
@@ -104,6 +120,7 @@ useFrame(() => {
 
 
   return (
+<>
     <mesh
       ref={mesh} 
       onPointerDown={handleTouch}
@@ -117,6 +134,8 @@ useFrame(() => {
       <planeGeometry args={[8, 8]} />
       <meshStandardMaterial map={imageTexture} side={Three.DoubleSide} transparent={true}  />
     </mesh>
+    {/* <ImageModal isVisible={isImageOpen}  /> */}
+    </>
   );
 } 
 
