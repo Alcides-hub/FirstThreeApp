@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setDialogueVisibility, fetchDialogue, setCurrentDialogueIndex, handleEndDialogue } from '../actions/dialogueActions'; // Adjust path as necessary
+import { fetchDialogue, setCurrentDialogueIndex, handleEndDialogue } from '../actions/dialogueActions'; // Adjust path as necessary
 import DialogueBox from './dialogueBox';
 import CharacterImage from './character';
 import * as Font from 'expo-font';
@@ -17,16 +17,21 @@ async function loadFonts() {
   
 
   export default function dialogueFetcher() {
-    const dispatch = useDispatch();
-    const { isDialogueVisible, data: dialogueData, currentDialogueIndex } = useSelector((state) => state.dialogue);
-    const currentDialogue = dialogueData?.dialogueList[currentDialogueIndex];
+    // const dispatch = useDispatch();
+    // const { isDialogueVisible, data: dialogueData, currentDialogueIndex } = useSelector((state) => state.dialogue);
+    // const currentDialogue = dialogueData?.dialogueList[currentDialogueIndex];
     // Fetch the dialogue data from Firestore once
     // console.log({ isDialogueVisible, dialogueData, currentDialogueIndex });
+    const dispatch = useDispatch();
+    const dialogueKey = 'kasa_dialogue/kasa_start'; // This combines your collection and documentId
+    const { isDialogueVisible, data, currentDialogueIndex } = useSelector((state) => state.dialogue);
+    const dialogueData = data[dialogueKey] || {}; // Safely access the specific dialogue data
+    const currentDialogue = dialogueData?.dialogueList?.[currentDialogueIndex];
 
-        useEffect(() => {
-            dispatch(fetchDialogue("kasa_start"));
-            
-        }, [dispatch]);
+    useEffect(() => {
+      dispatch(fetchDialogue("kasa_dialogue", "kasa_start"));
+      
+    }, [dispatch]);
         
  
         const handleNextDialogue = () => {

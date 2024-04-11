@@ -1,7 +1,7 @@
 const initialState = {
     isDialogueVisible: true,
     loading: false,
-    data: null,
+    data: {},
     error: null,
     currentDialogueIndex: 0, // Add this line
     showModalNote: false,
@@ -24,6 +24,13 @@ const initialState = {
     showObject: false,
     rotationAngle: 0,
     controlMode: 'buttons',
+    selectedUmbrellas: [],
+    isOrderCorrect: false,
+    isVideoPlaying: false,
+    dialogueData: null,
+    isActive: false,
+    incorrectAttempts: 0,
+    isObakeVisible: false,
   };
 
 const dialogueReducer = (state = initialState, action) => {
@@ -31,20 +38,27 @@ const dialogueReducer = (state = initialState, action) => {
         case 'SET_DIALOGUE_VISIBILITY':
             return {
                 ...state,
-                isDialogueVisible: action.payload,
+                isActive: action.payload,
             };
-        case 'FETCH_DIALOGUE_START':
+
+        case 'SET_OBAKE_VISIBLE':
             return {
                 ...state,
-                loading: true,
-                error: null, // Clear previous errors on new fetch
+                isObakeVisible: action.payload,
             };
-        case 'FETCH_DIALOGUE_SUCCESS':
-            return {
-                ...state,
-                loading: false,
-                data: action.payload,
-            };
+            case 'FETCH_DIALOGUE_START':
+                return { ...state, loading: true, error: null };
+              case 'FETCH_DIALOGUE_SUCCESS':
+                const { collection, documentId, data } = action.payload;
+        console.log("FETCH_DIALOGUE_SUCCESS received:", { collection, documentId, data });
+        return {
+            ...state,
+            loading: false,
+            data: {
+            ...state.data,
+            [`${collection}/${documentId}`]: data,
+                  },
+                };
         case 'FETCH_DIALOGUE_ERROR':
             return {
                 ...state,
@@ -92,6 +106,38 @@ const dialogueReducer = (state = initialState, action) => {
                 ...state,
                 showObject: action.payload,
                 }
+            case 'SET_SELECTED_UMBRELLAS':
+                return {
+                    ...state,
+                    selectedUmbrellas: action.payload,
+                }
+            case 'SET_INCORRECT_ATTEMPTS':
+                console.log('Current incorrectAttempts:', state.incorrectAttempts);
+                console.log('Updating incorrectAttempts to:', action.payload);
+                return {
+                ...state,
+                incorrectAttempts: action.payload,
+                }
+            case 'SET_DIALOGUE_DATA':
+                return {
+                    ...state,
+                    dialogueData: action.payload,
+                }
+            case 'SET_IS_ORDER_CORRECT':
+                return {
+                    ...state,
+                    isOrderCorrect: action.payload,
+                }
+            case 'SET_IS_VIDEO_PLAYING':
+                return {
+                    ...state,
+                    isVideoPlaying: action.payload,
+                }
+            case 'IS_DIALOGUE_ACTIVE':
+                return {
+                    ...state,
+                    isActive: action.payload,
+                }
             case 'SET_ZOOM_TARGET':
                     return { ...state, zoomTarget: action.payload};
             case 'SET_ZOOM_ACTIVE':
@@ -101,11 +147,13 @@ const dialogueReducer = (state = initialState, action) => {
             case 'SET_SPHERICAL_COORDS':
                     return { ...state, sphericalCoords: action.payload.sphericalCoords };
             case 'SET_IMAGE_OPEN':
-                    return { ...state, isImageOpen: action.payload };
+                const newState = { ...state, isImageOpen: action.payload };
+//   console.log('SET_IMAGE_OPEN action received, new state:', newState);
+  return newState;
             case 'SET_ZOOM_COMPLETE':
+                console.log('SET_ZOOM_COMPLETE action received, new state:', action.payload);
             return {
                 ...state,
-            // isImageOpen: ,
             isZoomCompleted: action.payload,
             };
             case 'ENABLE_ZOOM':

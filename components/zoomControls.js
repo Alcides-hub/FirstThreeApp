@@ -43,7 +43,7 @@ function zoomControls({ zoomSpeed = 5}) {
       camera.updateProjectionMatrix();
       const targetVec = new Three.Vector3(...zoomTarget);
       camera.lookAt(targetVec);
-      console.log(zoomTarget,"hello");
+      // console.log(zoomTarget,"hello");
 
       if (Math.abs(camera.fov - zoomLevel) < zoomThreshold) {
         dispatch(setZoomCompleted(true));
