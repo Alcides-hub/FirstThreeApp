@@ -25,10 +25,12 @@ const initialState = {
     rotationAngle: 0,
     controlMode: 'buttons',
     selectedUmbrellas: [],
-    isCorrectOrder: false,
+    isOrderCorrect: false,
+    isVideoPlaying: false,
     dialogueData: null,
-    isDialogueActive: false,
+    isActive: false,
     incorrectAttempts: 0,
+    isObakeVisible: false,
   };
 
 const dialogueReducer = (state = initialState, action) => {
@@ -36,20 +38,25 @@ const dialogueReducer = (state = initialState, action) => {
         case 'SET_DIALOGUE_VISIBILITY':
             return {
                 ...state,
-                isDialogueVisible: action.payload,
+                isActive: action.payload,
+            };
+
+        case 'SET_OBAKE_VISIBLE':
+            return {
+                ...state,
+                isObakeVisible: action.payload,
             };
             case 'FETCH_DIALOGUE_START':
                 return { ...state, loading: true, error: null };
               case 'FETCH_DIALOGUE_SUCCESS':
                 const { collection, documentId, data } = action.payload;
-                console.log("FETCH_DIALOGUE_SUCCESS received:", { collection, documentId, data });
-
-                return {
-                  ...state,
-                  loading: false,
-                  data: {
-                    ...state.data,
-                    [`${collection}/${documentId}`]: data,
+        console.log("FETCH_DIALOGUE_SUCCESS received:", { collection, documentId, data });
+        return {
+            ...state,
+            loading: false,
+            data: {
+            ...state.data,
+            [`${collection}/${documentId}`]: data,
                   },
                 };
         case 'FETCH_DIALOGUE_ERROR':
@@ -105,9 +112,11 @@ const dialogueReducer = (state = initialState, action) => {
                     selectedUmbrellas: action.payload,
                 }
             case 'SET_INCORRECT_ATTEMPTS':
+                console.log('Current incorrectAttempts:', state.incorrectAttempts);
+                console.log('Updating incorrectAttempts to:', action.payload);
                 return {
                 ...state,
-                inCorrectAttempts: action.payload,
+                incorrectAttempts: action.payload,
                 }
             case 'SET_DIALOGUE_DATA':
                 return {
@@ -117,12 +126,17 @@ const dialogueReducer = (state = initialState, action) => {
             case 'SET_IS_ORDER_CORRECT':
                 return {
                     ...state,
-                    isCorrectOrder: action.payload,
+                    isOrderCorrect: action.payload,
+                }
+            case 'SET_IS_VIDEO_PLAYING':
+                return {
+                    ...state,
+                    isVideoPlaying: action.payload,
                 }
             case 'IS_DIALOGUE_ACTIVE':
                 return {
                     ...state,
-                    isDialogueActive: action.payload,
+                    isActive: action.payload,
                 }
             case 'SET_ZOOM_TARGET':
                     return { ...state, zoomTarget: action.payload};

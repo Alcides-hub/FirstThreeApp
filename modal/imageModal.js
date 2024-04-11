@@ -1,7 +1,7 @@
 import React, {useRef, useState, useEffect} from 'react';
 import { View, Image, Text, TouchableOpacity, Animated, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import {fetchDialogue, setCurrentDialogueIndex, handleEndDialogue, setDialogueData, setIncorrectAttempts, setIsDialogueActive, setisCorrectOrder, setSelectedUmbrellas } from '../actions/dialogueActions';
+import {fetchDialogue, setImageOpen, handleEndDialogue, setDialogueData, setIncorrectAttempts, setisCorrectOrder, setSelectedUmbrellas, setDialogueVisibility, setIsCorrectOrder } from '../actions/dialogueActions';
 import Modal from 'react-native-modal';
 // import { db } from '../firebaseConfig';
 // import { initializeApp } from "firebase/app";
@@ -39,11 +39,23 @@ function ImageModal({ isVisible, onClose, onCorrectOrder }) {
   const yPosition = imageHeight / 3; // This will be the middle of the image on the Y-axis
    // State to track the sequence of selected umbrellas
    const dispatch = useDispatch();
-    const dialogueKey = 'kasa_comments/kasa_erande_fail1'; // This combines your collection and documentId
-    const { isDialogueVisible, data, currentDialogueIndex, isDialogueActive, umbrellas, incorrectAttempts, selectedUmbrellas, isCorrectOrder } = useSelector((state) => state.dialogue);
-    const dialogueData = data[dialogueKey] || {}; // Safely access the specific dialogue data
-    const currentDialogue = dialogueData?.dialogueList?.[currentDialogueIndex];
+    // const dialogueKey = 'kasa_comments/kasa_erande_fail1'; // This combines your collection and documentId
+    
+    const { incorrectAttempts, selectedUmbrellas} = useSelector((state) => state.dialogue);
+    // const currentDialogueKey = `kasa_comments/kasa_erande_fail${incorrectAttempts + 1}`;
+    // const dialogueData = data[currentDialogueKey] || {}; // Safely access the specific dialogue data
+    // const currentDialogue = dialogueData || {};
+    const isActive = useSelector(state => state.dialogue);
+    // console.log("isActive state:", isActive);
+    const currentDialogueKey = `kasa_comments/kasa_erande_fail${incorrectAttempts}`;
+    const currentDialogue = useSelector((state) => state.dialogue.data[currentDialogueKey]) || {};
+    console.log("Current Dialogue Key:", currentDialogueKey);
+    console.log("Current Dialogue:", currentDialogue);
+    const [showDialogue, setShowDialogue] = useState(false);
 
+    
+    // console.log("Dialogue Data:", dialogueData);
+    // console.log("Current Dialogue:", currentDialogue);
   //  const [selectedUmbrellas, setSelectedUmbrellas] = useState([]);
   //  const [dialogueData, setDialogueData] = useState(null);
    // State to hold the current dialogue item
@@ -53,6 +65,8 @@ function ImageModal({ isVisible, onClose, onCorrectOrder }) {
   //  const [isDialogueActive, setIsDialogueActive] = useState(false);
   //  const [incorrectAttempts, setIncorrectAttempts] = useState(0);
    
+  
+ 
 
    const customCharacterStyle = styles.customCharacterStyle;
    const customDialogueStyle = styles.customDialogueStyle;
@@ -72,10 +86,10 @@ function ImageModal({ isVisible, onClose, onCorrectOrder }) {
   //     console.error(`Error fetching dialogue: ${dialogueId}`, error);
   //   }
   // };
-  useEffect(() => {
-    dispatch(fetchDialogue("kasa_comments", "kasa_erande_fail1"));
+  // useEffect(() => {
+  //   dispatch(fetchDialogue("kasa_comments", "kasa_welcome"));
     
-  }, [dispatch]);
+  // }, [dispatch]);
   
 // Update the currentDialogue whenever currentDialogueIndex changes
 // useEffect(() => {
@@ -92,17 +106,27 @@ const handleUmbrellaPress = (umbrellaIndex) => {
   dispatch(setSelectedUmbrellas(newSelectedUmbrellas));
 };
 
+
 useEffect(() => {
   if (selectedUmbrellas.length === 3) {
     const requiredOrder = [7, 5, 2];
-    const isCorrectOrder = selectedUmbrellas.every((val, index) => val === requiredOrder[index]);
+    const isCorrectOrder = selectedUmbrellas.length === requiredOrder.length && 
+    selectedUmbrellas.every((val, index) => val === requiredOrder[index]);
 
     if (!isCorrectOrder) {
       const newAttemptNumber = incorrectAttempts + 1;
-      dispatch(fetchDialogue(`kasa_erande_fail${newAttemptNumber}`));
+      console.log("Dispatching new attempt number: ", incorrectAttempts + 1);
+      // dispatch(fetchDialogue(`kasa_erande_fail${newAttemptNumber}`));
+      console.log(`Fetching dialogue for attempt number: ${newAttemptNumber}`);
+      dispatch(fetchDialogue("kasa_comments", `kasa_erande_fail${newAttemptNumber}`));
       dispatch(setIncorrectAttempts(newAttemptNumber));
+      setShowDialogue(true);
+      // setStartHideTimeout(true);
+      // dispatch(setImageOpen(false));
+      console.log(newAttemptNumber, "failed?")
     } else {
       if (typeof onCorrectOrder === 'function') {
+        // dispatch(setIsCorrectOrder(true));
         onCorrectOrder();
         onClose();
         console.log("Correct order achieved");
@@ -111,7 +135,7 @@ useEffect(() => {
       }
 
       // These actions should happen regardless of whether onCorrectOrder is a function
-      dispatch(setIsDialogueActive(false));
+      // dispatch(isDialogueActive(false));
       dispatch(setIncorrectAttempts(0)); // Reset attempts on success
     }
     dispatch(setSelectedUmbrellas([])); // Reset for next attempt
@@ -126,13 +150,17 @@ useEffect(() => {
     umbrellaPositions.push({ x: xPosition, y: yPosition }); // Using the calculated middle Y position
   }
 
-const handleDialogueComplete = () => {
-  // Logic to execute when dialogue is complete
-  setTimeout(() => {
-    dispatch(setIsDialogueActive(false)); // Hide the dialogue after 5 seconds
-  }, 2000); // 5000 milliseconds = 5 seconds
-};
+  // useEffect to handle the hiding of dialogue after a certain time
+  useEffect(() => {
+    let timeoutId;
+  if (showDialogue) {
+    timeoutId = setTimeout(() => {
+      setShowDialogue(false); // Hide dialogue after 5 seconds
+    }, 9000);
+  }
 
+  return () => clearTimeout(timeoutId); // Cleanup timeout
+}, [showDialogue]);
 
 
 // Animated value for the pulsing effect
@@ -161,8 +189,8 @@ React.useEffect(() => {
   startPulsing();
 }, []);
 
-console.log("Image Width:", image.width);
-console.log("Image Height:", image.height);
+// console.log("Image Width:", image.width);
+// console.log("Image Height:", image.height);
 
 
   return (
@@ -177,7 +205,7 @@ console.log("Image Height:", image.height);
   <View style={{  alignItems: 'center', justifyContent: 'center' }}>
     <Image 
       source={image} 
-      style={{ width: 500, height: 350 }} 
+      style={{ width: 500, height: 330 }} 
       resizeMode="contain"  
     />
     <TouchableOpacity onPress={onClose}>
@@ -214,8 +242,16 @@ console.log("Image Height:", image.height);
     })}
     
   </View>
-  {isDialogueActive && <CharacterImage characterEmotion={characterEmotion} customCharacterStyle={customCharacterStyle} />}
-  {isDialogueActive && <DialogueBox currentDialogue={currentDialogue} characterName={currentDialogue?.name}  customDialogueStyle={customDialogueStyle} onDialogueComplete={handleDialogueComplete} />}
+  {
+   incorrectAttempts > 0  && currentDialogue && isActive && showDialogue && (
+    <>
+      <CharacterImage characterEmotion={currentDialogue.characterEmotion} customCharacterStyle={customCharacterStyle} />
+      <DialogueBox currentDialogue={currentDialogue} characterName={currentDialogue.name} customDialogueStyle={customDialogueStyle}  />
+    </>
+   
+  )
+}
+
 </Modal>
   );
   }
@@ -232,9 +268,8 @@ const styles = StyleSheet.create({
     },
   customDialogueStyle: {
       position: 'absolute',
-      zIndex: 2,
-      left: 0, // Adjust as needed for positioning
-      bottom: 0,
+      left: 10, // Adjust as needed for positioning
+      bottom: -10, // Adj
   },
 });
 

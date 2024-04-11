@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setDialogueVisibility, fetchDialogue, setCurrentDialogueIndex, handleEndDialogue } from '../actions/dialogueActions'; // Adjust path as necessary
+import { fetchDialogue, setCurrentDialogueIndex, handleEndDialogue } from '../actions/dialogueActions'; // Adjust path as necessary
 import DialogueBox from './dialogueBox';
 import CharacterImage from './character';
 import * as Font from 'expo-font';

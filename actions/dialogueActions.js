@@ -3,12 +3,21 @@ import { db } from '../firebaseConfig'; // Adjust path as necessary
 
 export const setDialogueVisibility = (isVisible) => {
     return {
-        type: 'SET_DIALOGUE_VISIBILITY',
+        type: SET_DIALOGUE_VISIBILITY,
         payload: isVisible,
     };
 }
 
+export const setObakeVisible = (isVisible) => {
+  return {
+    type: SET_OBAKE_VISIBLE,
+    payload: isVisible,
+  }
+}
+
 // Action Types
+const SET_DIALOGUE_VISIBILITY = 'SET_DIALOGUE_VISIBILITY';
+const SET_OBAKE_VISIBLE = 'SET_OBAKE_VISIBLE';
 const IS_DIALOGUE_ACTIVE = 'IS_DIALOGUE_ACTIVE';
 const FETCH_DIALOGUE_START = 'FETCH_DIALOGUE_START';
 const FETCH_DIALOGUE_SUCCESS = 'FETCH_DIALOGUE_SUCCESS';
@@ -36,7 +45,8 @@ const ENABLE_ZOOM = "ENABLE_ZOOM";
 const SET_SELECTED_UMBRELLAS = "SET_SELECTED_UMBRELLAS";
 const SET_IS_CORRECT_ORDER = "SET_IS_CORRECT_ORDER";
 const SET_DIALOGUE_DATA = 'SET_DIALOGUE_DATA';
-const SET_INCORRECT_ATTEMPTS = 'SET_INCORRECT_ATTEMPTS'
+const SET_INCORRECT_ATTEMPTS = 'SET_INCORRECT_ATTEMPTS';
+const SET_IS_VIDEO_PLAYING = 'SET_IS_VIDEO_PLAYING';
 
 // Action Creators
 export const fetchDialogueStart = () => ({
@@ -68,9 +78,14 @@ export const isDialogueActive = (isActive) => ({
   payload: isActive,
 })
 
-export const setisCorrectOrder = (isCorrectOrder) => ({
+export const setIsCorrectOrder = (isCorrect) => ({
   type: SET_IS_CORRECT_ORDER,
-  payload: isCorrectOrder,
+  payload: isCorrect,
+})
+
+export const setIsVideoPlaying = (isPlaying) => ({
+  type: SET_IS_VIDEO_PLAYING,
+  payload: isPlaying,
 })
 
 export const setIncorrectAttempts = (incorrectAttempts) => ({

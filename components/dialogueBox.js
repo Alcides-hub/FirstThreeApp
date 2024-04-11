@@ -7,19 +7,23 @@ import {setDialogueVisibility} from '../actions/dialogueActions';
 
 
 const DialogueBox = ({currentDialogue, characterName, handleOptionPress, customDialogueStyle, onDialogueComplete}) => {
-  const isDialogueVisible = useSelector((state) => state.dialogue.isDialogueVisible);
+  console.log('Custom Style dialogue:', customDialogueStyle);
+  console.log(currentDialogue, 'current data rendered');
+  console.log(characterName, 'What is my name?');
+  const isActive = useSelector((state) => state.dialogue);
   const dispatch = useDispatch();
 
   const handleDialogueComplete = () => {
+    console.log('About to hide dialogue');
     if (onDialogueComplete) {
       onDialogueComplete();
     }
-    dispatch(setDialogueVisibility(false));
+    // dispatch(setDialogueVisibility(false));
   };
-    if (!isDialogueVisible) {
+    if (!isActive) {
       return null;
     }
-
+ 
   
   
   const [patuaLoaded] = useFonts({
@@ -40,7 +44,7 @@ const DialogueBox = ({currentDialogue, characterName, handleOptionPress, customD
         <Text style={styles.nameText}>{characterName}</Text>
       </View>
     <View style={styles.dialogueBoxText}>
-      <TypeWriter typing={1} minDelay={-100} onTypingEnd={handleDialogueComplete}>
+      <TypeWriter typing={1} minDelay={-100} >
         <Text style={styles.dialogueText}>{currentDialogue.dialogue}</Text>
       </TypeWriter>
     </View>
@@ -58,7 +62,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(245, 245, 220, 0.5)', // Replace with your actual color and transparency
     borderWidth: 1,
     borderColor: "white",
-    minHeight: 40,
+    minHeight: 50,
     width: 760,
     marginBottom: 13,
     alignSelf: "center", 

@@ -1,5 +1,5 @@
 import { useState, Suspense, useEffect} from 'react';
-import { View}  from 'react-native';
+import { View, StyleSheet}  from 'react-native';
 import { Canvas} from '@react-three/fiber/native';
 import * as Three from 'three';
 import * as ScreenOrientation from 'expo-screen-orientation';
@@ -30,14 +30,18 @@ import BackButton from './components/BackButton';
 import CameraStateUpdater from './components/cameraStateUpdater';
 import ImageModal from './modal/imageModal';
 import {useDispatch, useSelector} from 'react-redux';
-import  {setImageOpen, setZoomCompleted} from './actions/dialogueActions';
-
+import  {requestCameraReset, setImageOpen, setIsCorrectOrder, setIsVideoPlaying, setObakeVisible} from './actions/dialogueActions';
+import { Video } from 'expo-av';
+import MonsterScene from './components/MonsterScene';
 
   
   export default function TestApp() {
 
     const isImageOpen = useSelector(state => state.dialogue.isImageOpen);
     const isZoomCompleted = useSelector((state) => state.dialogue.isZoomCompleted);
+    const isOrderCorrect  = useSelector((state) => state.dialogue.isOrderCorrect);
+    const isVideoPlaying = useSelector((state)=> state.dialogue.isVideoPlaying);
+    const isObakeVisible = useSelector((state)=> state.dialogue.isObakeVisible);
     const dispatch = useDispatch();
 
 
@@ -58,12 +62,44 @@ import  {setImageOpen, setZoomCompleted} from './actions/dialogueActions';
         }
       }, [isZoomCompleted, dispatch]);
 
+      useEffect(() => {
+        Asset.loadAsync(require('./assets/videos/kasa_appear.mp4'))
+          .then(() => console.log("Video asset loaded successfully."))
+          .catch((error) => console.error("Failed to load video asset:", error));
+      }, []);
+
       const handleClose = () => {
         dispatch(setImageOpen(false));
+        dispatch(requestCameraReset(true));
         // dispatch(setZoomCompleted(false));
         console.log(`Zoom Completed: ${isZoomCompleted}, Image Open: ${isImageOpen}`);
       }
-    
+
+      const handleCorrectOrder = (isVideoPlaying) => {
+        console.log("handleCorrectOrder triggered");
+        dispatch(setIsCorrectOrder(true));  // Update state based on child component's interaction
+        dispatch(setIsVideoPlaying(true));
+        console.log("video working:", isVideoPlaying);
+      };
+
+      const handlePlaybackStatusUpdate = (playbackStatus) => {
+        if (playbackStatus.didJustFinish) {
+          // The video has finished playing
+          console.log("Video finished playing");
+          dispatch(setIsVideoPlaying(false));
+          dispatch(setObakeVisible(true));
+        }
+      
+        // You can also handle other status updates like buffering, errors, etc.
+        if (playbackStatus.isBuffering) {
+          console.log("Video is buffering");
+        }
+      
+        if (playbackStatus.error) {
+          console.error("Video playback error:", playbackStatus.error);
+        }
+      };
+          
       
     
       return (
@@ -79,6 +115,7 @@ import  {setImageOpen, setZoomCompleted} from './actions/dialogueActions';
             <ImageSphere />
             <EggBox/>
             <Hotspot/>
+            {!isVideoPlaying && isObakeVisible && (<MonsterScene/>)}
             </Suspense>
             <ZoomControls />
             <CameraStateUpdater />
@@ -91,9 +128,30 @@ import  {setImageOpen, setZoomCompleted} from './actions/dialogueActions';
           <SideDrawerMode />
           <SideDrawerOption />
           <TouchControls />
-          {isImageOpen && <ImageModal isVisible={isImageOpen} onClose={handleClose} />}
+          {isImageOpen && <ImageModal isVisible={isImageOpen} onClose={handleClose} onCorrectOrder={handleCorrectOrder}/>}
+          {isVideoPlaying && !isOrderCorrect && (
+        <Video
+            source={require('./assets/videos/kasa_appear.mp4')}
+            rate={1.0}
+            volume={1.0}
+            isMuted={false}
+            resizeMode="cover"
+            shouldPlay
+            isLooping={false}
+            useNativeControls
+            style={styles.video}
+            onPlaybackStatusUpdate={handlePlaybackStatusUpdate} 
+            onError={(e) => console.log('Video Error:', e)}
+        />
+      )}
       </View>
     // </NativeBaseProvider>
     // </Provider>
   );
 };
+const styles = StyleSheet.create({
+  video: {
+    height: '100%',
+    width: '100%',
+},
+});

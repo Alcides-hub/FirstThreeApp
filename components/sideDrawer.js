@@ -27,6 +27,8 @@ const SideDrawerOption = (onLook, onUseItem) => {
       note1: Note1,
     };
     const interactedItems = useSelector((state) => state.dialogue.interactedItems);
+    const NUM_VISIBLE_ITEMS = Math.floor(300 / 100); // equals 3
+
    
      // Define size for the arrows based on screen size
      
@@ -78,7 +80,7 @@ const SideDrawerOption = (onLook, onUseItem) => {
 
 const scrollDown = () => {
   // Calculate the next index
-  const nextIndex = currentIndex + 1;
+  const nextIndex = currentIndex - 1;
 
   // Update the current index in the state
   setCurrentIndex(nextIndex);
@@ -94,8 +96,8 @@ const scrollDown = () => {
 };
 
 const scrollUp = () => {
-  const prevIndex = currentIndex -1;
-
+  const maxIndex = items.length - NUM_VISIBLE_ITEMS;
+  const prevIndex = Math.min(currentIndex + 1, maxIndex);
   setCurrentIndex(prevIndex);
 
   const offset = prevIndex * ITEM_WIDTH;
@@ -124,7 +126,7 @@ const arrowSize = {
 
     // The renderItem function for FlatList
     const renderItem = ({ item, index }) => {
-      const isVisible = index >= currentIndex && index < currentIndex + 6;
+      const isVisible = index >= currentIndex && index < currentIndex + NUM_VISIBLE_ITEMS;
       if (!isVisible) return null;
     
       return (
