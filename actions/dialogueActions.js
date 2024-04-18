@@ -1,5 +1,7 @@
 import { doc, getDoc } from 'firebase/firestore'; // Instead of 'firebase/firestore/lite'
-import { db } from '../firebaseConfig'; // Adjust path as necessary
+import { auth, db } from '../firebaseConfig'; // Adjust path as necessary
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut} from 'firebase/auth';
+// import { useNavigation } from '@react-navigation/native'
 
 export const setDialogueVisibility = (isVisible) => {
     return {
@@ -12,10 +14,14 @@ export const setObakeVisible = (isVisible) => {
   return {
     type: SET_OBAKE_VISIBLE,
     payload: isVisible,
-  }
+  };
 }
 
+
+
+
 // Action Types
+const RESET_DIALOGUE = 'RESET_DIALOGUE';
 const SET_DIALOGUE_VISIBILITY = 'SET_DIALOGUE_VISIBILITY';
 const SET_OBAKE_VISIBLE = 'SET_OBAKE_VISIBLE';
 const IS_DIALOGUE_ACTIVE = 'IS_DIALOGUE_ACTIVE';
@@ -47,6 +53,19 @@ const SET_IS_CORRECT_ORDER = "SET_IS_CORRECT_ORDER";
 const SET_DIALOGUE_DATA = 'SET_DIALOGUE_DATA';
 const SET_INCORRECT_ATTEMPTS = 'SET_INCORRECT_ATTEMPTS';
 const SET_IS_VIDEO_PLAYING = 'SET_IS_VIDEO_PLAYING';
+const AUTH_START = 'AUTH_START';
+const AUTH_SUCCESS = 'AUTH_SUCCESS';
+const AUTH_FAIL = 'AUTH_FAIL';
+const LOGOUT = 'LOGOUT';
+const SET_USER = 'SET_USER';
+
+
+
+
+export const resetDialogue = () => ({
+  type: RESET_DIALOGUE,
+});
+
 
 // Action Creators
 export const fetchDialogueStart = () => ({
@@ -255,9 +274,97 @@ const TOGGLE_CONTROL_MODE = 'TOGGLE_CONTROL_MODE';
 export const toggleControlMode = () => ({
   type: TOGGLE_CONTROL_MODE,
 });
+export const authStart = () => ({
+  type: AUTH_START,
+});
+
+export const authSuccess = (userData) => ({
+  type: AUTH_SUCCESS,
+  payload: userData,
+});
+
+export const authFail = (error) => ({
+  type: AUTH_FAIL,
+  payload: error,
+});
+
+export const logout = () => ({
+  type: LOGOUT,
+});
+
+export const setUser = (user) => ({
+  type: SET_USER,
+  payload: user,
+});
+
+export const handleCreateAccount = (email, password) => {
+  return async (dispatch) => {
+      dispatch(authStart());
+      try {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+          // Extract necessary, serializable data from the user object
+          const userData = {
+              id: user.uid,
+              email: user.email,
+              emailVerified: user.emailVerified,
+              isAnonymous: user.isAnonymous,
+              // Add other properties you need
+          };
+          console.log("Account created:", userData);
+          dispatch(authSuccess(userData));
+      } catch (error) {
+          console.log("Error creating account:", error);
+          dispatch(authFail(error.message));
+      }
+  };
+};
+
+export const handleAccountSignin = (email, password) => {
+  console.log("Function called with email:", email);
+  console.log("Function called with password:", password);
+  // console.log("Function called with setUser:", setUser); // Should log the function itself
+  
+  return async (dispatch) => {
+      dispatch(authStart());
+      try {
+          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+          const userData = {
+              id: user.uid,
+              email: user.email,
+              emailVerified: user.emailVerified,
+              isAnonymous: user.isAnonymous,
+              // Add other properties you need
+          };
+          console.log("You are signed in!");
+          dispatch(authSuccess(userData));
+          // dispatch(fetchDialogue("kasa_dialogue", "kasa_start")); 
+          console.log(userData, "right data please")
+          // console.log("Attempting to call setUser");
+          dispatch(setUser(userData));
+          console.log(setUser, "userSet");
+   
+          
+      } catch (error) {
+          console.log("Error signing in:", error);
+          dispatch(authFail(error.message));
+        
+      }
+  };
+};
 
 
-
-
-
-
+export const handleAccountSignout = (setUser) => {
+  console.log("Function called with setUser:", setUser); 
+  return async (dispatch) => {
+      try {
+          await signOut(auth);
+          console.log("Logged out successfully!");
+          dispatch(logout());
+      } catch (error) {
+          console.log("Error logging out:", error);
+          dispatch(authFail(error.message));
+      }
+  };
+};

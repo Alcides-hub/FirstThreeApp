@@ -6,6 +6,8 @@ import { showModalImage ,hideModalImage, toggleSideDrawer, setCurrentSelectedIte
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig'; // Import your Firestore instance
 import ImageModal2 from '../modal/imageModal2'; 
+// import { clearFirestoreCollection } from '../scripts/clearFirestoreCollection' // Adjust path as needed
+
 
 
 const eggBox = require('../image/eggBox.jpg');
@@ -67,9 +69,21 @@ const SideDrawerOption = (onLook, onUseItem) => {
         fetchItems();
       }, [isDrawerOpen, interactedItems]);
 
+       // Effect to clear state on application start/reset
+  
+       // Effect to clear Firestore collection on component mount
+  //   useEffect(() => {
+  //   const initializeSideDrawer = async () => {
+  //     // Clear the 'objects' collection at startup
+  //     await clearFirestoreCollection('objects');
+  //   };
+
+  //   initializeSideDrawer();
+  // }, []); // Empty dependency array to ensure it runs only on component mount
+
+
     if (!isDrawerOpen) {
 
-      
       return null;
     }
 
@@ -188,7 +202,7 @@ const arrowSize = {
           keyExtractor={(item) => item.id.toString()}
           horizontal={false}
           showsHorizontalScrollIndicator={false}
-          style={{ position: 'absolute', left: arrowSize.width * 2.65, top: window.height * 0.1, height: window.height * 1 }}
+          style={{ position: 'absolute', left: arrowSize.width * 2.65, top: window.height * 0.27, height: window.height * 1 }}
           contentContainerStyle={{ alignItems: 'center' }}
         />
         <Box style={{

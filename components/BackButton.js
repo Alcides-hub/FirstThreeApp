@@ -25,7 +25,7 @@ function BackButton() {
       }
 
     return (
-     <TouchableOpacity onPress={handleBackButtonClick} style={{position: 'absolute', bottom: 50, right: 20}}>
+     <TouchableOpacity onPress={handleBackButtonClick} style={{position: 'absolute', bottom: 40, right: 20}}>
       <Image source={require('../assets/back.png')} style={{ width: 50, height: 50 }} />
      </TouchableOpacity>
           )
