@@ -31,10 +31,11 @@ async function loadFonts() {
     useEffect(() => {
       dispatch(fetchDialogue("kasa_dialogue", "kasa_start"));
       
-    }, [dispatch]);
+    }, []);
         
  
         const handleNextDialogue = () => {
+          console.log('Handling next dialogue');
             const nextIndex = currentDialogueIndex + 1;
             if (dialogueData && nextIndex < dialogueData.dialogueList.length) {
               if (dialogueData.dialogueList[nextIndex].order === 4) {

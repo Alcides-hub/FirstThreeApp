@@ -1,8 +1,10 @@
 const initialState = {
     isDialogueVisible: true,
+    dialogues: [],
     loading: false,
     data: {},
     error: null,
+    user: null,
     currentDialogueIndex: 0, // Add this line
     showModalNote: false,
     showEggBox: false,
@@ -31,6 +33,7 @@ const initialState = {
     isActive: false,
     incorrectAttempts: 0,
     isObakeVisible: false,
+
   };
 
 const dialogueReducer = (state = initialState, action) => {
@@ -211,11 +214,42 @@ const dialogueReducer = (state = initialState, action) => {
                 ...state,
                 rotationAngle: state.rotationAngle + action.payload,
             };
-            case 'TOGGLE_CONTROL_MODE':
-                return {
-                  ...state,
-                  controlMode: state.controlMode === 'buttons' ? 'gyroscope' : 'buttons',
-                };
+        case 'TOGGLE_CONTROL_MODE':
+            return {
+                ...state,
+                controlMode: state.controlMode === 'buttons' ? 'gyroscope' : 'buttons',
+            };
+        case 'AUTH_START':
+            return {
+                ...state,
+                error: null,
+                laoding: true,
+            };
+        case 'AUTH_SUCCESS':
+            return {
+                ...state,
+                user: action.payload,
+                error: null,
+                loading: false,
+            };
+        case 'AUTH_FAIL':
+            return {
+            ...state,
+            error: action.payload,
+            loading: false,
+            };
+        case 'SET_USER':
+            return {
+                ...state,
+                user: action.payload,
+            };
+        case 'LOGOUT':
+            return {
+                ...state,
+                user: null,
+            };
+        case 'RESET_DIALOGUE':
+            return initialState;
             default:
             return state;
     }
