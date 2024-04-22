@@ -30,7 +30,7 @@ import BackButton from './components/BackButton';
 import CameraStateUpdater from './components/cameraStateUpdater';
 import ImageModal from './modal/imageModal';
 import {useDispatch, useSelector} from 'react-redux';
-import  {requestCameraReset, setImageOpen, setIsCorrectOrder, setIsVideoPlaying, setObakeVisible} from './actions/dialogueActions';
+import  {requestCameraReset, setImageOpen, setIsCorrectOrder, setIsVideoPlaying, setObakeVisible, showModalImage} from './actions/dialogueActions';
 import { Video } from 'expo-av';
 import MonsterScene from './components/MonsterScene';
 import LogoutButton from './components/logoutButton';

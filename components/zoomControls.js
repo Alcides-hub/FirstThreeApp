@@ -61,6 +61,4 @@ function zoomControls({ zoomSpeed = 5}) {
 }
 
 
-
-
 export default zoomControls;

@@ -28,7 +28,7 @@ function ImageComponent() {
   }
 
   return (
-    <mesh position={[-3, 0, 0]}>
+    <mesh position={[13, 0, -3]}>
       <planeGeometry args={[8, 8]} />
       <meshBasicMaterial map={imageTexture} side={Three.DoubleSide} transparent={true}  />
     </mesh>
