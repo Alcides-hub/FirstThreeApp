@@ -5,14 +5,14 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import { useNavigation } from '@react-navigation/native';
 import LogoutButton from './logoutButton';
 import { AntDesign } from "@expo/vector-icons";
-import { handleCreateAccount, handleAccountSignin, handleAccountSignOut, logout, fetchDialogue, setUser } from '../actions/dialogueActions';
+import { handleCreateAccount, handleAccountSignin, fetchDialogue } from '../actions/dialogueActions';
 
 
 function LoginScreen() {
     const [email, setEmail] = useState('');
     const [isFocused, setIsFocused] = useState(false);
-    const user = useSelector(state => state.dialogue.user); // Make sure this path matches how you've set up your rootReducer
-
+    const user = useSelector(state => state.auth.user); // Make sure this path matches how you've set up your rootReducer
+    
  
     const [password, setPassword] = useState('');
     // const { setUser, ...otherProps} = props;   
@@ -66,8 +66,8 @@ function LoginScreen() {
 // Event handlers
 const handleAccountSigninPress = () => {
     // Dispatch the login action
-    dispatch(handleAccountSignin(email, password, setUser));
-    navigation.replace('FirstLevel');
+    dispatch(handleAccountSignin(email, password));
+    navigation.replace('TutorialScreen');
     
 };
 
@@ -76,11 +76,12 @@ const handleCreateAccountPress = () => {
     dispatch(handleCreateAccount(email, password));
 };
 
-useEffect(() => {
-    if (user) { // assuming 'user' changes to null on logout and is set on login
-        dispatch(fetchDialogue("kasa_dialogue", "kasa_start"));
-    }
-}, [user, dispatch]); // Include `user` in the dependency array
+// useEffect(() => {
+//     if (user) { // assuming 'user' changes to null on logout and is set on login
+//         dispatch(fetchDialogue("tutorial", "tutorialstart"));
+        
+//     }
+// }, [user, dispatch]); // Include `user` in the dependency array
 
 // const handleAccountSignOutPress = () => {
 //     // Dispatch the logout action
