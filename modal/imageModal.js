@@ -142,6 +142,8 @@ useEffect(() => {
   }
 }, [selectedUmbrellas, onCorrectOrder]);
 
+
+
         
 
 
@@ -161,6 +163,9 @@ useEffect(() => {
 
   return () => clearTimeout(timeoutId); // Cleanup timeout
 }, [showDialogue]);
+
+
+
 
 
 // Animated value for the pulsing effect

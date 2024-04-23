@@ -58,6 +58,9 @@ const AUTH_SUCCESS = 'AUTH_SUCCESS';
 const AUTH_FAIL = 'AUTH_FAIL';
 const LOGOUT = 'LOGOUT';
 const SET_USER = 'SET_USER';
+const SET_CURRENT_DIALOGUE = 'SET_CURRENT_DIALOGUE';
+const SET_CHARACTER_EMOTION = 'SET_CHARACTER_EMOTION';
+const LOG_ERROR = 'LOG_ERROR';
 
 
 
@@ -368,3 +371,18 @@ export const handleAccountSignout = (setUser) => {
       }
   };
 };
+
+export const setCurrentDialogue = (dialogue) => ({
+  type: SET_CURRENT_DIALOGUE,
+  payload: dialogue,
+});
+
+export const setCharacterEmotion = (emotion) => ({
+  type: SET_CHARACTER_EMOTION,
+  payload: emotion,
+});
+
+export const logError = (error) => ({
+  type: LOG_ERROR,
+  error,
+});

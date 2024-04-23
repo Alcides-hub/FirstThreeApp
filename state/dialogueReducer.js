@@ -33,7 +33,9 @@ const initialState = {
     isActive: false,
     incorrectAttempts: 0,
     isObakeVisible: false,
-
+    currentDialogue: null,
+    characterEmotion: null,
+    error: null,
   };
 
 const dialogueReducer = (state = initialState, action) => {
@@ -50,24 +52,27 @@ const dialogueReducer = (state = initialState, action) => {
                 isObakeVisible: action.payload,
             };
             case 'FETCH_DIALOGUE_START':
-                return { ...state, loading: true, error: null };
-              case 'FETCH_DIALOGUE_SUCCESS':
-                const { collection, documentId, data } = action.payload;
-        console.log("FETCH_DIALOGUE_SUCCESS received:", { collection, documentId, data });
-        return {
-            ...state,
-            loading: false,
-            data: {
+            return { ...state, loading: true, error: null };
+            
+            case 'FETCH_DIALOGUE_SUCCESS':
+            console.log("FETCH_DIALOGUE_SUCCESS received:", { collection, documentId, data });
+            
+    const { collection, documentId, data } = action.payload;
+    return {
+        ...state,
+        data: {
             ...state.data,
             [`${collection}/${documentId}`]: data,
-                  },
-                };
+        },
+    };
+
         case 'FETCH_DIALOGUE_ERROR':
             return {
                 ...state,
                 loading: false,
                 error: action.payload,
             };
+
             case 'SET_CURRENT_DIALOGUE_INDEX':
                 return {
                   ...state,
@@ -247,6 +252,21 @@ const dialogueReducer = (state = initialState, action) => {
             return {
                 ...state,
                 user: null,
+            };
+        case 'SET_CURRENT_DIALOGUE':
+                return {
+                    ...state,
+                    currentDialogue: action.payload, // Update the current dialogue
+            };
+        case 'SET_CHARACTER_EMOTION':
+                return {
+                    ...state,
+                    characterEmotion: action.payload, // Update the character emotion
+            };
+        case 'LOG_ERROR':
+                return {
+                    ...state,
+                    error: action.error, // Log error to state
             };
         case 'RESET_DIALOGUE':
             return initialState;

@@ -7,6 +7,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {setInteractedItem, setCurrentSelectedItem , setZoomActive, setZoomTarget, setZoomLevel, setZoomCompleted, setImageOpen} from '../actions/dialogueActions';
 import { Dimensions } from 'react-native';
 import { useSaveCameraState} from '../hooks/handleSaveCameraState';
+import { toggleControlMode } from "../actions/dialogueActions";
 // import ImageModal from '../modal/imageModal';
 // import {View} from 'react-native';
 
@@ -98,7 +99,7 @@ useFrame(() => {
   };
 
   const handleTouchEnd = (point) => {
-    dispatch(setZoomCompleted(false)); 
+    // dispatch(setZoomCompleted(false)); 
     if (!point) return; // Early return if point is not defined
   // console.log("TouchEnd event triggered", point);
     const ItemName = "Hotspot"; // Or dynamically determine based on the object interacted with
@@ -107,6 +108,8 @@ useFrame(() => {
     dispatch(setZoomTarget([point.x, point.y, point.z]));
     dispatch(setZoomActive(true));
     dispatch(setZoomLevel(15));
+    dispatch(toggleControlMode());
+    // };
     // console.log('Dispatching setImageOpen(true)');
     // dispatch(setImageOpen(true));
    

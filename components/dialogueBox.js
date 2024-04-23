@@ -12,6 +12,7 @@ const DialogueBox = ({currentDialogue, characterName, handleOptionPress, customD
   console.log(characterName, 'What is my name?');
   const isActive = useSelector((state) => state.dialogue);
   const dispatch = useDispatch();
+  
 
   const handleDialogueComplete = () => {
     console.log('About to hide dialogue');
